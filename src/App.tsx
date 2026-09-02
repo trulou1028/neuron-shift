@@ -164,7 +164,7 @@ export function App() {
       <header className="topbar">
         <div className="brand-lockup">
           <span className="brand-mark"><FlowArrow size={20} weight="duotone" /></span>
-          <div><strong>NEURON</strong><span>Field notes</span></div>
+          <div><strong>NEURON</strong><span>Shift</span></div>
         </div>
         <div className="top-actions">
           <span className="prototype-pill">Exploratory prototype</span>
