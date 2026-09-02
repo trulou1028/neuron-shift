@@ -386,3 +386,13 @@ button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 .canvas-widget__foot { color: #6d7889; font-size: 9.5px; }
 .canvas-widget__pill { display: inline-flex; align-items: center; gap: 5px; border: 1px solid #35405a; background: rgba(15,19,27,.96); color: #9fb0c9; border-radius: 999px; padding: 4px 9px; font-size: 10.5px; font-weight: 700; cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,.4); }
 .canvas-widget__pill:hover { border-color: #4f79b5; color: #dbe8fb; }
+
+/* Widget dragging */
+.canvas-widget { cursor: grab; user-select: none; }
+.canvas-widget.is-dragging { cursor: grabbing; box-shadow: 0 18px 44px rgba(0,0,0,.6); border-color: #4f79b5; }
+.canvas-widget__grip { color: #55606f; flex: 0 0 auto; }
+.canvas-widget:hover .canvas-widget__grip { color: #8a95a5; }
+.canvas-widget__head button { cursor: pointer; }
+.canvas-widget__pill { cursor: grab; }
+.canvas-widget.is-dragging .canvas-widget__pill { cursor: grabbing; }
+.react-flow__controls-button:disabled { opacity: .35; cursor: not-allowed; }

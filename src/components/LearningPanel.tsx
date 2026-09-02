@@ -10,7 +10,7 @@ import {
   type PowerNode,
 } from "../data/scenario";
 import { decisionLabel, recommendationByNode, type OperatorDecision } from "../data/decisions";
-import type { WidgetKind } from "./CanvasWidgets";
+import type { WidgetKind } from "../data/widgets";
 
 const lensTabs: { id: LensTab; label: string }[] = [
   { id: "ask", label: "Ask" },

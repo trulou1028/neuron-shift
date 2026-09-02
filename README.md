@@ -39,7 +39,7 @@ The Shift Brief opens on load. Present it first.
 4. **Click "Open on graph" on item 01.** The brief closes, the graph pans and zooms onto UPS-A1 with a short pulse, the affected path traces in amber, and the asset panel opens on the **Evidence** tab with Sarah's decision shown above the AI hypothesis. Nodes that carry a handoff decision show a small clipboard marker.
 5. **Open the Ask tab.** Neuron has already answered the questions for this asset, so there is no prompt to compose. Each answer cites assets by name.
 6. **Open the Impact tab on UPS-A1.** Nothing loses power and three assets are held by redundancy. Now select PDU-05 and look again: two racks lose power and nothing covers them. The graph draws the de-energised path in dashed red. That contrast is the point.
-7. **Open the recommendation on UPS-A1 and choose Approve.** Four pre-flight steps must be acknowledged and the asset name typed before the button unlocks. Compare with Switchgear SWGR-A, where a reversible threshold change is a single click. Record the decision and it pins to the canvas beside its asset and appears in the shift brief under "Decisions you are handing on."
+7. **Open the recommendation on UPS-A1 and choose Approve.** Four pre-flight steps must be acknowledged and the asset name typed before the button unlocks. Compare with Switchgear SWGR-A, where a reversible threshold change is a single click. Record the decision and it pins to the canvas beside its asset and appears in the shift brief under "Decisions you are handing on." Drag the pinned card anywhere; it stays with its asset and survives a reload. The broom control under the zoom buttons clears pins and decisions between runs.
 8. **Drag a node, then reset.** The circular-arrow **Reset layout** control under the zoom buttons restores the layout. The graph is a live layout, not a picture.
 9. **Turn on the Learning layer** in the toolbar. A violet section appends below the operator panel with definitions, a glossary for the acronyms on screen, and an optional self-test. The line to say: I am not the user, so my scaffolding switches off.
 10. **Click "Shift brief" in the top bar.** The handoff is available for the whole shift, not only at the start.
@@ -61,7 +61,8 @@ Built:
 - A/B redundancy scenario
 - Guided investigation steps
 - Recommendation and approval flow with a visible autonomy ladder, four decision types, and friction scaled to reversibility
-- Decisions pinned to the canvas as widgets anchored to their asset, and carried into the shift brief
+- Decisions pinned to the canvas as draggable widgets anchored to their asset, and carried into the shift brief
+- Pinned cards and recorded decisions persist across reloads, with a control to clear them
 - Asset panel with Ask, Evidence, and Impact tabs
 - Anchored questions answered per asset, each citing named assets
 - Failure impact computed from the real topology, separating what drops from what redundancy holds

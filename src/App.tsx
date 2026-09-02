@@ -28,17 +28,28 @@ import {
   type LensTab,
   type PowerNode,
 } from "./data/scenario";
-import { buildInitialNodes, initialPositions, savePositions } from "./layoutStorage";
+import {
+  buildInitialNodes,
+  clearPinsAndDecisions,
+  initialPositions,
+  readStoredDecisions,
+  readStoredWidgets,
+  saveDecisions,
+  savePositions,
+  saveWidgets,
+} from "./layoutStorage";
 import { useMockTelemetry } from "./useMockTelemetry";
 import { AssetPanel } from "./components/LearningPanel";
 import { LearningLayer } from "./components/LearningLayer";
 import { MissionPanel } from "./components/MissionPanel";
 import { PowerNodeCard } from "./components/PowerNodeCard";
 import { ResetLayoutControl } from "./components/ResetLayoutControl";
+import { ClearBoardControl } from "./components/ClearBoardControl";
 import { ViewportFocus, type FocusRequest } from "./components/ViewportFocus";
 import { ShiftBrief } from "./components/ShiftBrief";
 import { DecisionDialog } from "./components/DecisionDialog";
-import { CanvasWidgets, type PinnedWidget, type WidgetKind } from "./components/CanvasWidgets";
+import { CanvasWidgets } from "./components/CanvasWidgets";
+import { defaultOffset, type PinnedWidget, type WidgetKind } from "./data/widgets";
 import { recommendationByNode, simulatedNow, type OperatorDecision } from "./data/decisions";
 import { cssVariables, palette } from "./theme";
 
@@ -62,9 +73,15 @@ export function App() {
   const [briefOpen, setBriefOpen] = useState(true);
   const [pulseId, setPulseId] = useState<string | null>(null);
   const [focusRequest, setFocusRequest] = useState<FocusRequest | null>(null);
-  const [decisions, setDecisions] = useState<OperatorDecision[]>([]);
+  const [decisions, setDecisions] = useState<OperatorDecision[]>(readStoredDecisions);
   const [reviewOpen, setReviewOpen] = useState(false);
-  const [widgets, setWidgets] = useState<PinnedWidget[]>([]);
+  const [widgets, setWidgets] = useState<PinnedWidget[]>(() => {
+    const stored = readStoredDecisions();
+    // A decision card with no decision behind it would render empty, so drop it.
+    return readStoredWidgets().filter(
+      (widget) => widget.kind !== "decision" || stored.some((decision) => decision.node === widget.node),
+    );
+  });
   const telemetry = useMockTelemetry();
   const selectedNode = powerNodes.find((node) => node.id === selectedId) ?? defaultNode;
 
@@ -180,6 +197,9 @@ export function App() {
 
   const minutesSinceHandoff = shiftHandoff.minutesAgoAtLoad + Math.floor(telemetry.elapsedSeconds / 60);
 
+  useEffect(() => saveWidgets(widgets), [widgets]);
+  useEffect(() => saveDecisions(decisions), [decisions]);
+
   const decisionFor = (nodeId: string) => decisions.find((item) => item.node === nodeId);
   const isPinned = (nodeId: string, kind: WidgetKind) => widgets.some((w) => w.node === nodeId && w.kind === kind);
 
@@ -187,9 +207,23 @@ export function App() {
     setWidgets((current) =>
       current.some((w) => w.node === nodeId && w.kind === kind)
         ? current.filter((w) => !(w.node === nodeId && w.kind === kind))
-        : [...current, { id: `${nodeId}-${kind}`, node: nodeId, kind }],
+        : [
+            ...current,
+            {
+              id: `${nodeId}-${kind}`,
+              node: nodeId,
+              kind,
+              offset: defaultOffset(current.filter((w) => w.node === nodeId).length),
+            },
+          ],
     );
   };
+
+  const clearBoard = useCallback(() => {
+    setWidgets([]);
+    setDecisions([]);
+    clearPinsAndDecisions();
+  }, []);
 
   // A recorded decision pins itself, so the operator's own call is on the canvas
   // for the rest of the shift rather than buried in a panel.
@@ -198,7 +232,15 @@ export function App() {
     setWidgets((current) =>
       current.some((w) => w.node === decision.node && w.kind === "decision")
         ? current
-        : [...current, { id: `${decision.node}-decision`, node: decision.node, kind: "decision" }],
+        : [
+            ...current,
+            {
+              id: `${decision.node}-decision`,
+              node: decision.node,
+              kind: "decision",
+              offset: defaultOffset(current.filter((w) => w.node === decision.node).length),
+            },
+          ],
     );
     setReviewOpen(false);
   };
@@ -282,6 +324,7 @@ export function App() {
               <Background variant={BackgroundVariant.Dots} gap={18} size={1} color={palette.graphGrid} />
               <Controls showInteractive={false} position="bottom-left">
                 <ResetLayoutControl onReset={resetLayout} />
+                <ClearBoardControl onClear={clearBoard} disabled={widgets.length === 0 && decisions.length === 0} />
               </Controls>
               <ViewportFocus request={focusRequest} />
               <CanvasWidgets
@@ -289,6 +332,9 @@ export function App() {
                 nodes={nodes}
                 decisions={decisions}
                 onUnpin={(id) => setWidgets((current) => current.filter((w) => w.id !== id))}
+                onMove={(id, offset) =>
+                  setWidgets((current) => current.map((w) => (w.id === id ? { ...w, offset } : w)))
+                }
                 onSelect={setSelectedId}
               />
               <MiniMap
