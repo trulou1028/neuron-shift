@@ -12,6 +12,8 @@ export type PowerNodeData = {
   whyItMatters: string;
   signal: string;
   assumption?: boolean;
+  /** Set per render. "review" means a human owes a decision here; "decided" means one was made. */
+  review?: "review" | "decided";
 };
 
 export type PowerNode = Node<PowerNodeData, "power">;

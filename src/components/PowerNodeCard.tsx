@@ -1,5 +1,5 @@
 import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { BookOpenText, ClipboardText } from "@phosphor-icons/react";
+import { BookOpenText, Check, ClipboardText, Gavel } from "@phosphor-icons/react";
 import { handoffByNode, type PowerNode } from "../data/scenario";
 
 export function PowerNodeCard({ id, data, selected }: NodeProps<PowerNode>) {
@@ -21,6 +21,12 @@ export function PowerNodeCard({ id, data, selected }: NodeProps<PowerNode>) {
       </div>
       <b className="power-node__metric">{data.metric}</b>
       <span className="power-node__label">{data.metricLabel}</span>
+      {data.review === "review" && (
+        <span className="power-node__review"><Gavel size={11} weight="fill" /> Needs your review</span>
+      )}
+      {data.review === "decided" && (
+        <span className="power-node__decided"><Check size={11} weight="bold" /> Decided by you</span>
+      )}
       <span className="power-node__learn" aria-hidden="true">
         <BookOpenText size={14} weight="bold" />
       </span>

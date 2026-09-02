@@ -396,3 +396,43 @@ button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 .canvas-widget__pill { cursor: grab; }
 .canvas-widget.is-dragging .canvas-widget__pill { cursor: grabbing; }
 .react-flow__controls-button:disabled { opacity: .35; cursor: not-allowed; }
+
+/* "A human owes a decision here." Distinct from amber, which is an equipment condition. */
+.react-flow__node.needs-review .power-node {
+  border-color: var(--danger);
+  box-shadow: inset 3px 0 0 var(--danger), 0 0 0 1px rgba(251,79,91,.28), 0 10px 30px rgba(0,0,0,.4);
+}
+.react-flow__node.needs-review .power-node::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 11px;
+  border: 1.5px solid var(--danger);
+  pointer-events: none;
+  animation: review-pulse 2.4s ease-out infinite;
+}
+@keyframes review-pulse {
+  0% { opacity: .85; transform: scale(1); }
+  70%, 100% { opacity: 0; transform: scale(1.07); }
+}
+.power-node__review, .power-node__decided {
+  display: flex; align-items: center; gap: 5px;
+  margin-top: 9px; padding-top: 8px; padding-right: 20px;
+  border-top: 1px solid #2a2028;
+  font-size: 10.5px; font-weight: 700; letter-spacing: .01em;
+}
+.power-node__review { color: #ff8f98; }
+.power-node__decided { color: #7fd3a3; border-top-color: #1e3327; font-weight: 600; }
+.react-flow__node.is-decided .power-node { border-color: #2c6b48; }
+
+.review-badge { border: 1px solid #6b252c; background: #21100f; border-radius: 999px; padding: 6px 10px; font-size: 11px; font-weight: 600; color: #ffb3b8; }
+.review-badge span { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; background: var(--danger); box-shadow: 0 0 8px rgba(251,79,91,.55); }
+.legend-ring { width: 8px; height: 8px; border: 2px solid var(--danger); border-radius: 50%; }
+
+/* The impact overlay owns the canvas while it is on, so review styling steps aside. */
+.react-flow__node.impact-muted .power-node::before,
+.react-flow__node.impact-dropped .power-node::before { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .react-flow__node.needs-review .power-node::before { animation: none; opacity: .8; }
+}

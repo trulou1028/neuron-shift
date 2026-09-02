@@ -50,7 +50,7 @@ import { ShiftBrief } from "./components/ShiftBrief";
 import { DecisionDialog } from "./components/DecisionDialog";
 import { CanvasWidgets } from "./components/CanvasWidgets";
 import { defaultOffset, type PinnedWidget, type WidgetKind } from "./data/widgets";
-import { recommendationByNode, simulatedNow, type OperatorDecision } from "./data/decisions";
+import { recommendationByNode, recommendations, simulatedNow, type OperatorDecision } from "./data/decisions";
 import { cssVariables, palette } from "./theme";
 
 const nodeTypes = { power: PowerNodeCard };
@@ -126,6 +126,18 @@ export function App() {
     return () => window.clearTimeout(timer);
   }, [pulseId]);
 
+  // Amber says the equipment has a condition. Red says a human owes a decision.
+  // They are different axes, so they get different colours.
+  const reviewState = useMemo(() => {
+    const map: Record<string, "review" | "decided"> = {};
+    for (const item of recommendations) {
+      map[item.node] = decisions.some((decision) => decision.node === item.node) ? "decided" : "review";
+    }
+    return map;
+  }, [decisions]);
+
+  const needsReviewCount = Object.values(reviewState).filter((state) => state === "review").length;
+
   // Impact overlay and the arrival pulse both express themselves as node classes,
   // so the canvas stays a pure function of state.
   const impact: ImpactResult | undefined = impactActive ? impactByNode.get(selectedId) : undefined;
@@ -134,6 +146,9 @@ export function App() {
     () =>
       nodes.map((node) => {
         const classes: string[] = [];
+        const review = reviewState[node.id];
+        if (review === "review") classes.push("needs-review");
+        if (review === "decided") classes.push("is-decided");
         if (node.id === pulseId) classes.push("is-pulsing");
         if (impact) {
           if (node.id === impact.failed) classes.push("impact-failed");
@@ -141,9 +156,10 @@ export function App() {
           else if (impact.held.includes(node.id)) classes.push("impact-held");
           else classes.push("impact-muted");
         }
-        return classes.length > 0 ? { ...node, className: classes.join(" ") } : node;
+        const next = review ? { ...node, data: { ...node.data, review } } : node;
+        return classes.length > 0 ? { ...next, className: classes.join(" ") } : next;
       }),
-    [nodes, pulseId, impact],
+    [nodes, pulseId, impact, reviewState],
   );
 
   const resetLayout = useCallback(() => {
@@ -295,6 +311,9 @@ export function App() {
             <div className="toolbar-controls">
               <span className="health-badge"><span /> {statusCounts.healthy} healthy</span>
               <span className="warning-badge"><span /> {statusCounts.warning} watch items</span>
+              {needsReviewCount > 0 && (
+                <span className="review-badge"><span /> {needsReviewCount} need your review</span>
+              )}
               <button
                 className={`mode-toggle ${learningMode ? "is-on" : ""}`}
                 aria-pressed={learningMode}
@@ -341,7 +360,7 @@ export function App() {
                 position="bottom-right"
                 pannable
                 zoomable
-                nodeColor={(node) => (node.data.status === "warning" ? palette.amber : palette.green)}
+                nodeColor={(node) => (reviewState[node.id] === "review" ? palette.danger : node.data.status === "warning" ? palette.amber : palette.green)}
                 maskColor={palette.minimapMask}
               />
             </ReactFlow>
@@ -350,6 +369,8 @@ export function App() {
               <span><i className="legend-line legend-line--amber" /> Investigated path</span>
               {impact ? (
                 <span><i className="legend-line legend-line--danger" /> De-energised if this fails</span>
+              ) : needsReviewCount > 0 ? (
+                <span><i className="legend-ring" /> Needs your review</span>
               ) : (
                 <span><i className="legend-dot" /> Click an asset to inspect</span>
               )}

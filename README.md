@@ -15,6 +15,8 @@ The handoff attacks the moment responsibility changes hands. The anchored AI att
 
 ### A position on autonomy
 
+Colour carries one meaning each. Amber says the equipment has a condition. Red says a human owes a decision. Those are different axes, so a rack sitting at 92% of its budget stays amber, while an asset with an undecided recommendation goes red, pulses, and says "Needs your review" on the card itself. Deciding clears it. The canvas therefore shows where human judgement is outstanding, not just where the plant is unhappy.
+
 Autonomy should be visible rather than implied. Every recommendation shows what Neuron may do alone, what needs approval, and what it must never touch. That is a promise about behaviour, which is more reassuring than any confidence score.
 
 Friction scales with reversibility. Raising an alert threshold is one click. Transferring critical load requires every pre-flight step acknowledged and the asset name typed back, because a one-click approve on a consequential action invites rubber-stamping.
