@@ -11,24 +11,27 @@ import {
   type NodeSelectionChange,
   type OnNodesChange,
 } from "@xyflow/react";
-import { Bell, BookOpenText, ClipboardText, FlowArrow, Gauge } from "@phosphor-icons/react";
+import { Bell, ClipboardText, FlowArrow, Gauge, GraduationCap } from "@phosphor-icons/react";
 import {
   affectedPath,
   connections,
   DEFAULT_SELECTED_ID,
   defaultNode,
+  impactByNode,
   learningSteps,
   powerNodes,
   shiftHandoff,
   statusCounts,
   type HandoffItem,
   type LearnSection,
+  type ImpactResult,
   type LensTab,
   type PowerNode,
 } from "./data/scenario";
 import { buildInitialNodes, initialPositions, savePositions } from "./layoutStorage";
 import { useMockTelemetry } from "./useMockTelemetry";
-import { LearningPanel } from "./components/LearningPanel";
+import { AssetPanel } from "./components/LearningPanel";
+import { LearningLayer } from "./components/LearningLayer";
 import { MissionPanel } from "./components/MissionPanel";
 import { PowerNodeCard } from "./components/PowerNodeCard";
 import { ResetLayoutControl } from "./components/ResetLayoutControl";
@@ -43,11 +46,14 @@ const defaultFitViewOptions = { padding: 0.06 };
 
 export function App() {
   const [selectedId, setSelectedId] = useState(DEFAULT_SELECTED_ID);
-  const [learningMode, setLearningMode] = useState(true);
+  const [learningMode, setLearningMode] = useState(false);
   const [traceActive, setTraceActive] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
   const [answer, setAnswer] = useState<string | null>(null);
-  const [tab, setTab] = useState<LensTab>("learn");
+  const [quizOpen, setQuizOpen] = useState(false);
+  const [openAsk, setOpenAsk] = useState<string | null>(null);
+  const [impactActive, setImpactActive] = useState(false);
+  const [tab, setTab] = useState<LensTab>("ask");
   const [openSection, setOpenSection] = useState<LearnSection>("what");
   const [honestyOpen, setHonestyOpen] = useState(false);
   const [briefOpen, setBriefOpen] = useState(true);
@@ -97,9 +103,24 @@ export function App() {
     return () => window.clearTimeout(timer);
   }, [pulseId]);
 
+  // Impact overlay and the arrival pulse both express themselves as node classes,
+  // so the canvas stays a pure function of state.
+  const impact: ImpactResult | undefined = impactActive ? impactByNode.get(selectedId) : undefined;
+
   const displayNodes = useMemo(
-    () => (pulseId ? nodes.map((node) => (node.id === pulseId ? { ...node, className: "is-pulsing" } : node)) : nodes),
-    [nodes, pulseId],
+    () =>
+      nodes.map((node) => {
+        const classes: string[] = [];
+        if (node.id === pulseId) classes.push("is-pulsing");
+        if (impact) {
+          if (node.id === impact.failed) classes.push("impact-failed");
+          else if (impact.dropped.includes(node.id)) classes.push("impact-dropped");
+          else if (impact.held.includes(node.id)) classes.push("impact-held");
+          else classes.push("impact-muted");
+        }
+        return classes.length > 0 ? { ...node, className: classes.join(" ") } : node;
+      }),
+    [nodes, pulseId, impact],
   );
 
   const resetLayout = useCallback(() => {
@@ -113,22 +134,24 @@ export function App() {
       connections.map(([source, target]) => {
         const id = `${source}-${target}`;
         const affected = traceActive && affectedPath.has(id);
-        const color = affected ? palette.amber : palette.green;
+        const deEnergised = impact ? impact.failed === source || impact.failed === target || impact.dropped.includes(target) : false;
+        const color = deEnergised ? palette.danger : affected ? palette.amber : palette.green;
         return {
           id,
           source,
           target,
           type: "smoothstep",
-          animated: affected,
+          animated: affected && !deEnergised,
           markerEnd: { type: MarkerType.ArrowClosed, color },
           style: {
             stroke: color,
-            strokeWidth: affected ? 2.4 : 1.4,
-            opacity: affected ? 1 : 0.58,
+            strokeWidth: deEnergised || affected ? 2.4 : 1.4,
+            opacity: impact && !deEnergised ? 0.22 : affected || deEnergised ? 1 : 0.58,
+            strokeDasharray: deEnergised ? "5 4" : undefined,
           },
         };
       }),
-    [traceActive],
+    [traceActive, impact],
   );
 
   // The one place trace state changes. Showing the trace also opens the lens on the evidence,
@@ -143,13 +166,19 @@ export function App() {
   const openHandoffOnGraph = (item: HandoffItem) => {
     setSelectedId(item.node);
     if (item.showsTrace) showTrace(true);
-    else setTab("learn");
+    else setTab("ask");
     setBriefOpen(false);
     setPulseId(item.node);
     setFocusRequest({ id: item.node, token: Date.now() });
   };
 
   const minutesSinceHandoff = shiftHandoff.minutesAgoAtLoad + Math.floor(telemetry.elapsedSeconds / 60);
+
+  // A new asset invalidates the open answer and any impact overlay from the previous one.
+  useEffect(() => {
+    setOpenAsk(null);
+    setImpactActive(false);
+  }, [selectedId]);
 
   const goToStep = (index: number) => {
     const step = learningSteps[index];
@@ -198,9 +227,10 @@ export function App() {
               <button
                 className={`mode-toggle ${learningMode ? "is-on" : ""}`}
                 aria-pressed={learningMode}
+                title="A personal onboarding overlay. Operators can switch it off."
                 onClick={() => setLearningMode((value) => !value)}
               >
-                <BookOpenText size={15} /> Learning labels
+                <GraduationCap size={15} /> Learning layer
                 <span className="toggle-track"><span /></span>
               </button>
             </div>
@@ -236,7 +266,11 @@ export function App() {
             <div className="flow-legend">
               <span><i className="legend-line legend-line--green" /> Normal flow</span>
               <span><i className="legend-line legend-line--amber" /> Investigated path</span>
-              <span><i className="legend-dot" /> Click an asset to learn</span>
+              {impact ? (
+                <span><i className="legend-line legend-line--danger" /> De-energised if this fails</span>
+              ) : (
+                <span><i className="legend-dot" /> Click an asset to inspect</span>
+              )}
             </div>
           </div>
 
@@ -252,17 +286,30 @@ export function App() {
           </div>
         </section>
 
-        <LearningPanel
-          node={selectedNode}
-          tab={tab}
-          onTabChange={setTab}
-          openSection={openSection}
-          onOpenSection={setOpenSection}
-          traceActive={traceActive}
-          onShowEvidence={() => showTrace(true)}
-          answer={answer}
-          onAnswer={setAnswer}
-        />
+        <div className="right-rail">
+          <AssetPanel
+            node={selectedNode}
+            tab={tab}
+            onTabChange={setTab}
+            openAsk={openAsk}
+            onOpenAsk={setOpenAsk}
+            traceActive={traceActive}
+            onShowEvidence={() => showTrace(true)}
+            impactActive={impactActive}
+            onToggleImpact={setImpactActive}
+          />
+          {learningMode && (
+            <LearningLayer
+              node={selectedNode}
+              openSection={openSection}
+              onOpenSection={setOpenSection}
+              answer={answer}
+              onAnswer={setAnswer}
+              quizOpen={quizOpen}
+              onToggleQuiz={() => setQuizOpen((value) => !value)}
+            />
+          )}
+        </div>
       </main>
 
       {briefOpen && (

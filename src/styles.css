@@ -27,10 +27,11 @@ button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 .avatar { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: #242a32; color: #d8dde4; font-size: 11px; font-weight: 700; }
 
 /* Workspace grid */
-.workspace { height: calc(100vh - 56px); display: grid; grid-template-columns: 272px minmax(620px, 1fr) 336px; }
-.mission-panel, .learning-panel { background: var(--panel); overflow-y: auto; }
+.workspace { height: calc(100vh - 56px); display: grid; grid-template-columns: 272px minmax(600px, 1fr) 348px; }
+.mission-panel, .right-rail { background: var(--panel); overflow-y: auto; }
+.right-rail { border-left: 1px solid var(--border); display: flex; flex-direction: column; }
 .mission-panel { border-right: 1px solid var(--border); padding: 16px; }
-.learning-panel { border-left: 1px solid var(--border); padding: 16px 18px 24px; }
+.learning-panel { padding: 16px 18px 20px; }
 
 .panel-kicker { color: #7ba8ef; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 7px; }
 .panel-kicker-row { display: flex; justify-content: space-between; align-items: center; }
@@ -131,7 +132,7 @@ button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 .react-flow__node.dragging .power-node { cursor: grabbing; transform: none; transition: none; border-color: #6d9ee6; box-shadow: 0 16px 40px rgba(0,0,0,.45); }
 
 /* Right panel */
-.learning-panel__top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+.learning-panel__top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .asset-status { padding: 4px 8px; border-radius: 999px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--green); background: #102d20; border: 1px solid #20583a; }
 .asset-status--warning { color: var(--amber); background: #30220d; border-color: #624716; }
 .selected-eyebrow { color: var(--muted); font-size: 11.5px; }
@@ -240,3 +241,65 @@ button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 .decision-record--compact dd:last-child { margin-bottom: 0; }
 .handoff-item__text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .handoff-item__text small { color: var(--text-2); font-size: 12px; font-weight: 500; line-height: 1.4; }
+
+/* Ask: anchored questions the AI answered up front */
+.ask-intro { display: flex; align-items: center; gap: 6px; margin: 0 0 10px; color: #7fd4e2; font-size: 11.5px; line-height: 1.45; }
+.ask-item { border-bottom: 1px solid #222a33; }
+.ask-item__q { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 2px; border: 0; background: transparent; color: var(--text-2); font-size: 12.5px; font-weight: 600; text-align: left; cursor: pointer; }
+.ask-item__q:hover { color: var(--text); }
+.ask-item.is-open .ask-item__q { color: var(--text); }
+.ask-item__q svg { flex: 0 0 auto; color: var(--muted); transition: transform .18s; }
+.ask-item.is-open .ask-item__q svg { transform: rotate(180deg); }
+.ask-item__a { padding: 0 2px 12px; }
+.ask-item__a p { margin: 0; color: #c3cad3; font-size: 12.5px; line-height: 1.55; }
+.ask-cites { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+.ask-cites span { border: 1px solid #27606d; background: #10282f; color: #8de5f0; border-radius: 5px; padding: 3px 7px; font-size: 10.5px; font-weight: 600; }
+
+/* Impact preview */
+.impact-head { display: flex; align-items: center; gap: 7px; color: #ff9aa2; font-size: 12.5px; font-weight: 600; margin-bottom: 12px; }
+.impact-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 14px; }
+.impact-summary div { border: 1px solid #262e37; background: #10141a; border-radius: 8px; padding: 9px 8px; display: flex; flex-direction: column; gap: 2px; }
+.impact-summary b { font-size: 18px; font-weight: 700; }
+.impact-summary span { color: var(--muted); font-size: 10.5px; line-height: 1.3; }
+.impact-summary .is-drop { border-color: #6b252c; background: #21100f; }
+.impact-summary .is-drop b { color: var(--danger); }
+.impact-summary .is-held { border-color: #20583a; background: #0f2016; }
+.impact-summary .is-held b { color: var(--green); }
+.impact-group { margin-bottom: 12px; }
+.impact-group > span { font-size: 11px; font-weight: 600; color: var(--muted); }
+.impact-group ul { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 4px; }
+.impact-group li { font-size: 12.5px; padding: 6px 9px; border-radius: 6px; border: 1px solid #262e37; background: #11161c; }
+.impact-group--drop li { border-color: #5c2229; background: #1d0f11; color: #ffb3b8; }
+.impact-group--held li { border-color: #1e4a33; background: #0f1d15; color: #9fe3bd; }
+.impact-toggle { width: 100%; border: 1px solid #6b252c; background: #2a1215; color: #ffb3b8; border-radius: 7px; padding: 9px; font-size: 12px; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 6px; cursor: pointer; }
+.impact-toggle:hover { background: #36171b; }
+.impact-toggle.is-on { border-color: #406fab; background: #1a3457; color: #dbe9ff; }
+.legend-line--danger { border-color: var(--danger); border-top-style: dashed; }
+
+/* Impact overlay on the canvas */
+.react-flow__node.impact-failed .power-node { border-color: var(--danger); box-shadow: 0 0 0 2px rgba(251,79,91,.22), inset 3px 0 0 var(--danger); }
+.react-flow__node.impact-dropped .power-node { border-color: #5c2229; background: #170d0f; color: #cf9ba0; }
+.react-flow__node.impact-dropped .power-node__metric { color: #b9767c; }
+.react-flow__node.impact-held .power-node { border-color: #24774d; box-shadow: 0 0 0 1px rgba(52,210,123,.2); }
+.react-flow__node.impact-muted .power-node { opacity: .32; }
+
+/* Learning layer: deliberately a different colour from the operator tool */
+.learning-layer { border-top: 1px solid #2a2340; background: #100e1a; padding: 14px 18px 22px; margin-top: auto; }
+.learning-layer__head { display: flex; align-items: center; gap: 7px; color: var(--violet); font-size: 11.5px; font-weight: 600; margin-bottom: 10px; }
+.learning-layer__head span { color: #6f6494; font-size: 10.5px; font-weight: 500; margin-left: auto; text-align: right; line-height: 1.3; }
+.learning-layer .learn-section { border-bottom-color: #2a2340; }
+.learning-layer .learn-section__toggle { color: #c6bce6; }
+.learning-layer .learn-section__toggle:hover, .learning-layer .learn-section.is-open .learn-section__toggle { color: #e7e1f7; }
+.learning-layer .learn-section p { color: #b3a9d2; }
+.glossary { margin: 12px 0 0; display: grid; gap: 7px; }
+.glossary div { border: 1px solid #2a2340; background: #16122400; border-radius: 7px; padding: 8px 10px; }
+.glossary dt { color: var(--violet); font-size: 11.5px; font-weight: 700; }
+.glossary dd { margin: 3px 0 0; color: #a99fc8; font-size: 11.5px; line-height: 1.45; }
+.self-test { margin-top: 12px; border-top: 1px solid #2a2340; }
+.self-test__toggle { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 11px 2px; border: 0; background: transparent; color: #c6bce6; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+.self-test__toggle svg { color: #6f6494; transition: transform .18s; }
+.self-test.is-open .self-test__toggle svg { transform: rotate(180deg); }
+.self-test__body p { margin: 0 0 10px; color: #cfc7e8; font-size: 12.5px; line-height: 1.5; }
+.self-test .answer-grid button { border-color: #322a4a; background: #17132a; color: #a99fc8; }
+.self-test .answer-grid button:hover, .self-test .answer-grid button.is-picked { border-color: #6b58a8; color: #e7e1f7; background: #221b3d; }
+.self-test .answer-grid button.is-correct { border-color: #2c7a50; color: #71dda0; background: #123020; }

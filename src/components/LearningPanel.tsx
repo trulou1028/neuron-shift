@@ -1,38 +1,43 @@
 import type { KeyboardEvent } from "react";
-import { BookOpenText, Brain, CaretDown, CircleNotch, ClipboardText, GraduationCap, Sparkle } from "@phosphor-icons/react";
+import { Brain, CaretDown, CircleNotch, ClipboardText, Crosshair, Lightning, Sparkle, Stack } from "@phosphor-icons/react";
 import {
   aiHypothesis,
+  asksForNode,
   handoffByNode,
-  learnSections,
-  lensTabs,
-  quiz,
-  type LearnSection,
+  impactByNode,
+  titleOf,
   type LensTab,
   type PowerNode,
 } from "../data/scenario";
+
+const lensTabs: { id: LensTab; label: string }[] = [
+  { id: "ask", label: "Ask" },
+  { id: "evidence", label: "Evidence" },
+  { id: "impact", label: "Impact" },
+];
 
 type LearningPanelProps = {
   node: PowerNode;
   tab: LensTab;
   onTabChange: (tab: LensTab) => void;
-  openSection: LearnSection;
-  onOpenSection: (section: LearnSection) => void;
+  openAsk: string | null;
+  onOpenAsk: (id: string | null) => void;
   traceActive: boolean;
   onShowEvidence: () => void;
-  answer: string | null;
-  onAnswer: (option: string) => void;
+  impactActive: boolean;
+  onToggleImpact: (next: boolean) => void;
 };
 
-export function LearningPanel({
+export function AssetPanel({
   node,
   tab,
   onTabChange,
-  openSection,
-  onOpenSection,
+  openAsk,
+  onOpenAsk,
   traceActive,
   onShowEvidence,
-  answer,
-  onAnswer,
+  impactActive,
+  onToggleImpact,
 }: LearningPanelProps) {
   // Arrow keys move between tabs, following the WAI-ARIA tabs pattern.
   const handleTabKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -50,16 +55,16 @@ export function LearningPanel({
     document.getElementById(`lens-tab-${next}`)?.focus();
   };
 
-  const feedback = answer === null ? "" : answer === quiz.answer ? quiz.correctFeedback : quiz.incorrectFeedback;
   const handoff = handoffByNode.get(node.id);
+  const asks = asksForNode(node.id);
+  const impact = impactByNode.get(node.id);
 
   return (
     <aside className="learning-panel">
       <div className="learning-panel__top">
-        <div className="panel-kicker"><BookOpenText size={16} weight="fill" /> Learning lens</div>
+        <span className="selected-eyebrow">{node.data.eyebrow}</span>
         <span className={`asset-status asset-status--${node.data.status}`}>{node.data.status}</span>
       </div>
-      <span className="selected-eyebrow">{node.data.eyebrow}</span>
       <h2>{node.data.title}</h2>
       <div className="selected-reading">
         <strong>{node.data.metric}</strong>
@@ -75,7 +80,7 @@ export function LearningPanel({
         </button>
       )}
 
-      <div className="lens-tabs" role="tablist" aria-label="Learning lens sections" onKeyDown={handleTabKeyDown}>
+      <div className="lens-tabs" role="tablist" aria-label="Asset panel sections" onKeyDown={handleTabKeyDown}>
         {lensTabs.map((item) => (
           <button
             key={item.id}
@@ -92,20 +97,45 @@ export function LearningPanel({
         ))}
       </div>
 
-      {tab === "learn" && (
-        <div className="lens-panel" role="tabpanel" id="lens-panel-learn" aria-labelledby="lens-tab-learn">
-          {learnSections.map((section) => {
-            const open = openSection === section.id;
+      {tab === "ask" && (
+        <div className="lens-panel" role="tabpanel" id="lens-panel-ask" aria-labelledby="lens-tab-ask">
+          <p className="ask-intro">
+            <Sparkle size={13} weight="fill" /> Neuron answered these for {node.data.title} before you asked.
+          </p>
+          {asks.map((ask) => {
+            const open = openAsk === ask.id;
             return (
-              <div key={section.id} className={`learn-section ${open ? "is-open" : ""}`}>
-                <button className="learn-section__toggle" aria-expanded={open} onClick={() => onOpenSection(section.id)}>
-                  {section.label}
-                  <CaretDown size={14} />
+              <div key={ask.id} className={`ask-item ${open ? "is-open" : ""}`}>
+                <button
+                  className="ask-item__q"
+                  aria-expanded={open}
+                  onClick={() => {
+                    onOpenAsk(open ? null : ask.id);
+                    if (!open && ask.opensImpact) {
+                      onTabChange("impact");
+                      onToggleImpact(true);
+                    }
+                  }}
+                >
+                  <span>{ask.question}</span>
+                  <CaretDown size={13} />
                 </button>
-                {open && <p>{section.read(node.data)}</p>}
+                {open && (
+                  <div className="ask-item__a">
+                    <p>{ask.answer}</p>
+                    {ask.cites.length > 0 && (
+                      <div className="ask-cites">
+                        {ask.cites.map((id) => (
+                          <span key={id}>{titleOf(id)}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })}
+          <p className="lens-footnote">Simulated reasoning. No model is called in this prototype.</p>
         </div>
       )}
 
@@ -138,31 +168,46 @@ export function LearningPanel({
         </div>
       )}
 
-      {tab === "check" && (
-        <div className="lens-panel" role="tabpanel" id="lens-panel-check" aria-labelledby="lens-tab-check">
-          <div className="knowledge-check">
-            <div className="knowledge-check__title"><GraduationCap size={17} /> Quick check</div>
-            <p>{quiz.question}</p>
-            <div className="answer-grid">
-              {quiz.options.map((option) => {
-                const picked = answer === option;
-                return (
-                  <button
-                    key={option}
-                    aria-pressed={picked}
-                    className={`${picked ? "is-picked" : ""} ${picked && option === quiz.answer ? "is-correct" : ""}`}
-                    onClick={() => onAnswer(option)}
-                  >
-                    {option}
-                  </button>
-                );
-              })}
+      {tab === "impact" && impact && (
+        <div className="lens-panel" role="tabpanel" id="lens-panel-impact" aria-labelledby="lens-tab-impact">
+          <div className="impact-head">
+            <Crosshair size={15} weight="bold" />
+            If {node.data.title} failed right now
+          </div>
+
+          <div className="impact-summary">
+            <div className={impact.dropped.length > 0 ? "is-drop" : ""}>
+              <b>{impact.dropped.length}</b>
+              <span>lose power</span>
             </div>
-            {/* Always rendered so screen readers announce the feedback when it changes. */}
-            <div className={`answer-feedback ${answer === quiz.answer ? "is-correct" : ""}`} role="status" aria-live="polite">
-              {feedback}
+            <div className={impact.held.length > 0 ? "is-held" : ""}>
+              <b>{impact.held.length}</b>
+              <span>held by redundancy</span>
+            </div>
+            <div>
+              <b>{impact.unaffected.length}</b>
+              <span>unaffected</span>
             </div>
           </div>
+
+          {impact.dropped.length > 0 && (
+            <div className="impact-group impact-group--drop">
+              <span>Loses power</span>
+              <ul>{impact.dropped.map((id) => <li key={id}>{titleOf(id)}</li>)}</ul>
+            </div>
+          )}
+          {impact.held.length > 0 && (
+            <div className="impact-group impact-group--held">
+              <span>Stays up on the redundant path</span>
+              <ul>{impact.held.map((id) => <li key={id}>{titleOf(id)}</li>)}</ul>
+            </div>
+          )}
+
+          <button className={`impact-toggle ${impactActive ? "is-on" : ""}`} aria-pressed={impactActive} onClick={() => onToggleImpact(!impactActive)}>
+            {impactActive ? <Stack size={15} weight="fill" /> : <Lightning size={15} weight="fill" />}
+            {impactActive ? "Clear impact from graph" : "Show impact on graph"}
+          </button>
+          <p className="lens-footnote">Computed from the modeled topology. Generators are not represented.</p>
         </div>
       )}
     </aside>

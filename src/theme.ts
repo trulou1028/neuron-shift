@@ -13,6 +13,8 @@ export const palette = {
   amber: "#f5a524",
   blue: "#5b95f5",
   cyan: "#47d6ea",
+  violet: "#a78bfa",
+  danger: "#fb4f5b",
   graphGrid: "#25303b",
   minimapMask: "rgba(6, 9, 13, .78)",
 } as const;
@@ -30,4 +32,6 @@ export const cssVariables: CssVariables = {
   "--amber": palette.amber,
   "--blue": palette.blue,
   "--cyan": palette.cyan,
+  "--violet": palette.violet,
+  "--danger": palette.danger,
 };
