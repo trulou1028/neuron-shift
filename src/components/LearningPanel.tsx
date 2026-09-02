@@ -1,5 +1,5 @@
 import type { KeyboardEvent } from "react";
-import { Brain, CaretDown, CircleNotch, ClipboardText, Crosshair, Lightning, Sparkle, Stack } from "@phosphor-icons/react";
+import { Brain, CaretDown, CircleNotch, ClipboardText, Crosshair, Gavel, Lightning, PushPin, Sparkle, Stack } from "@phosphor-icons/react";
 import {
   aiHypothesis,
   asksForNode,
@@ -9,6 +9,8 @@ import {
   type LensTab,
   type PowerNode,
 } from "../data/scenario";
+import { decisionLabel, recommendationByNode, type OperatorDecision } from "../data/decisions";
+import type { WidgetKind } from "./CanvasWidgets";
 
 const lensTabs: { id: LensTab; label: string }[] = [
   { id: "ask", label: "Ask" },
@@ -26,6 +28,10 @@ type LearningPanelProps = {
   onShowEvidence: () => void;
   impactActive: boolean;
   onToggleImpact: (next: boolean) => void;
+  decision?: OperatorDecision;
+  onReviewRecommendation: () => void;
+  onPin: (kind: WidgetKind) => void;
+  isPinned: (kind: WidgetKind) => boolean;
 };
 
 export function AssetPanel({
@@ -38,6 +44,10 @@ export function AssetPanel({
   onShowEvidence,
   impactActive,
   onToggleImpact,
+  decision,
+  onReviewRecommendation,
+  onPin,
+  isPinned,
 }: LearningPanelProps) {
   // Arrow keys move between tabs, following the WAI-ARIA tabs pattern.
   const handleTabKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -58,6 +68,14 @@ export function AssetPanel({
   const handoff = handoffByNode.get(node.id);
   const asks = asksForNode(node.id);
   const impact = impactByNode.get(node.id);
+  const recommendation = recommendationByNode.get(node.id);
+
+  const pinButton = (kind: WidgetKind) => (
+    <button className={`pin-button ${isPinned(kind) ? "is-pinned" : ""}`} aria-pressed={isPinned(kind)} onClick={() => onPin(kind)}>
+      <PushPin size={12} weight={isPinned(kind) ? "fill" : "bold"} />
+      {isPinned(kind) ? "Pinned to canvas" : "Pin to canvas"}
+    </button>
+  );
 
   return (
     <aside className="learning-panel">
@@ -78,6 +96,30 @@ export function AssetPanel({
         <button className="handoff-chip" onClick={() => onTabChange("evidence")}>
           <ClipboardText size={13} weight="fill" /> Handoff decision on record · {handoff.who}
         </button>
+      )}
+
+      {recommendation && !decision && (
+        <div className="rec-card">
+          <div className="rec-card__title"><Gavel size={14} weight="fill" /> Neuron recommends</div>
+          <p>{recommendation.headline}</p>
+          <div className="rec-card__meta">
+            <span className={recommendation.reversibility === "consequential" ? "is-high" : ""}>
+              {recommendation.reversibility === "consequential" ? "Needs your hands" : "Reversible"}
+            </span>
+            <span>Confidence {recommendation.confidence.toFixed(2)}</span>
+          </div>
+          <button onClick={onReviewRecommendation}>Review and decide</button>
+        </div>
+      )}
+
+      {decision && (
+        <div className={`rec-card rec-card--done rec-card--${decision.kind}`}>
+          <div className="rec-card__title"><Gavel size={14} weight="fill" /> {decisionLabel[decision.kind]} by you · {decision.at}</div>
+          <p>{decision.headline}</p>
+          {decision.detail && <p className="rec-card__detail">{decision.detail}</p>}
+          {decision.reason && <p className="rec-card__detail">Reason: {decision.reason}</p>}
+          <div className="rec-card__actions">{pinButton("decision")}</div>
+        </div>
       )}
 
       <div className="lens-tabs" role="tablist" aria-label="Asset panel sections" onKeyDown={handleTabKeyDown}>
@@ -149,6 +191,7 @@ export function AssetPanel({
                 <dt>Why</dt><dd>{handoff.why}</dd>
                 <dt>What you need to do</dt><dd className="is-next">{handoff.next}</dd>
               </dl>
+              <div className="rec-card__actions">{pinButton("handoff")}</div>
             </div>
           )}
           <div className="ai-insight">
@@ -207,6 +250,7 @@ export function AssetPanel({
             {impactActive ? <Stack size={15} weight="fill" /> : <Lightning size={15} weight="fill" />}
             {impactActive ? "Clear impact from graph" : "Show impact on graph"}
           </button>
+          <div className="rec-card__actions">{pinButton("impact")}</div>
           <p className="lens-footnote">Computed from the modeled topology. Generators are not represented.</p>
         </div>
       )}

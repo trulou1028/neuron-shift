@@ -37,6 +37,9 @@ import { PowerNodeCard } from "./components/PowerNodeCard";
 import { ResetLayoutControl } from "./components/ResetLayoutControl";
 import { ViewportFocus, type FocusRequest } from "./components/ViewportFocus";
 import { ShiftBrief } from "./components/ShiftBrief";
+import { DecisionDialog } from "./components/DecisionDialog";
+import { CanvasWidgets, type PinnedWidget, type WidgetKind } from "./components/CanvasWidgets";
+import { recommendationByNode, simulatedNow, type OperatorDecision } from "./data/decisions";
 import { cssVariables, palette } from "./theme";
 
 const nodeTypes = { power: PowerNodeCard };
@@ -59,6 +62,9 @@ export function App() {
   const [briefOpen, setBriefOpen] = useState(true);
   const [pulseId, setPulseId] = useState<string | null>(null);
   const [focusRequest, setFocusRequest] = useState<FocusRequest | null>(null);
+  const [decisions, setDecisions] = useState<OperatorDecision[]>([]);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [widgets, setWidgets] = useState<PinnedWidget[]>([]);
   const telemetry = useMockTelemetry();
   const selectedNode = powerNodes.find((node) => node.id === selectedId) ?? defaultNode;
 
@@ -174,6 +180,29 @@ export function App() {
 
   const minutesSinceHandoff = shiftHandoff.minutesAgoAtLoad + Math.floor(telemetry.elapsedSeconds / 60);
 
+  const decisionFor = (nodeId: string) => decisions.find((item) => item.node === nodeId);
+  const isPinned = (nodeId: string, kind: WidgetKind) => widgets.some((w) => w.node === nodeId && w.kind === kind);
+
+  const togglePin = (nodeId: string, kind: WidgetKind) => {
+    setWidgets((current) =>
+      current.some((w) => w.node === nodeId && w.kind === kind)
+        ? current.filter((w) => !(w.node === nodeId && w.kind === kind))
+        : [...current, { id: `${nodeId}-${kind}`, node: nodeId, kind }],
+    );
+  };
+
+  // A recorded decision pins itself, so the operator's own call is on the canvas
+  // for the rest of the shift rather than buried in a panel.
+  const recordDecision = (decision: OperatorDecision) => {
+    setDecisions((current) => [...current.filter((item) => item.node !== decision.node), decision]);
+    setWidgets((current) =>
+      current.some((w) => w.node === decision.node && w.kind === "decision")
+        ? current
+        : [...current, { id: `${decision.node}-decision`, node: decision.node, kind: "decision" }],
+    );
+    setReviewOpen(false);
+  };
+
   // A new asset invalidates the open answer and any impact overlay from the previous one.
   useEffect(() => {
     setOpenAsk(null);
@@ -255,6 +284,13 @@ export function App() {
                 <ResetLayoutControl onReset={resetLayout} />
               </Controls>
               <ViewportFocus request={focusRequest} />
+              <CanvasWidgets
+                widgets={widgets}
+                nodes={nodes}
+                decisions={decisions}
+                onUnpin={(id) => setWidgets((current) => current.filter((w) => w.id !== id))}
+                onSelect={setSelectedId}
+              />
               <MiniMap
                 position="bottom-right"
                 pannable
@@ -297,6 +333,10 @@ export function App() {
             onShowEvidence={() => showTrace(true)}
             impactActive={impactActive}
             onToggleImpact={setImpactActive}
+            decision={decisionFor(selectedId)}
+            onReviewRecommendation={() => setReviewOpen(true)}
+            onPin={(kind) => togglePin(selectedId, kind)}
+            isPinned={(kind) => isPinned(selectedId, kind)}
           />
           {learningMode && (
             <LearningLayer
@@ -312,9 +352,19 @@ export function App() {
         </div>
       </main>
 
+      {reviewOpen && recommendationByNode.get(selectedId) && (
+        <DecisionDialog
+          recommendation={recommendationByNode.get(selectedId) as NonNullable<ReturnType<typeof recommendationByNode.get>>}
+          now={simulatedNow(minutesSinceHandoff)}
+          onClose={() => setReviewOpen(false)}
+          onDecide={recordDecision}
+        />
+      )}
+
       {briefOpen && (
         <ShiftBrief
           minutesSinceHandoff={minutesSinceHandoff}
+          decisions={decisions}
           onStartShift={() => setBriefOpen(false)}
           onOpenOnGraph={openHandoffOnGraph}
         />

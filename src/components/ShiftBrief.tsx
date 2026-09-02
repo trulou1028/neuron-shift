@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { ArrowRight, CaretDown, ClipboardText, FlowArrow } from "@phosphor-icons/react";
 import { shiftHandoff, type HandoffItem } from "../data/scenario";
+import { decisionLabel, type OperatorDecision } from "../data/decisions";
 
 type ShiftBriefProps = {
   minutesSinceHandoff: number;
+  decisions: OperatorDecision[];
   onStartShift: () => void;
   onOpenOnGraph: (item: HandoffItem) => void;
 };
@@ -11,7 +13,7 @@ type ShiftBriefProps = {
 const changeKindLabel = { new: "New", changed: "Changed", resolved: "Resolved", unchanged: "No change" } as const;
 const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-export function ShiftBrief({ minutesSinceHandoff, onStartShift, onOpenOnGraph }: ShiftBriefProps) {
+export function ShiftBrief({ minutesSinceHandoff, decisions, onStartShift, onOpenOnGraph }: ShiftBriefProps) {
   const [openItem, setOpenItem] = useState<string | null>(null);
   const dialogRef = useRef<HTMLElement>(null);
   const attention = shiftHandoff.items.filter((item) => item.status === "attention").length;
@@ -117,6 +119,25 @@ export function ShiftBrief({ minutesSinceHandoff, onStartShift, onOpenOnGraph }:
             ))}
           </ul>
         </div>
+
+        {decisions.length > 0 && (
+          <div className="shift-changes">
+            <h3>Decisions you are handing on</h3>
+            <ul className="change-list">
+              {decisions.map((decision) => (
+                <li key={decision.recommendationId}>
+                  <span className={`change-kind change-kind--decision-${decision.kind}`}>{decisionLabel[decision.kind]}</span>
+                  <span>
+                    <b>{decision.headline}</b>
+                    {decision.detail ? ` · ${decision.detail}` : ""}
+                    {decision.reason ? ` · ${decision.reason}` : ""}
+                    {` · You, ${decision.at}`}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         <div className="shift-brief__footer">
           <small>Simulated handoff. Names, times, and thresholds are fictional.</small>
