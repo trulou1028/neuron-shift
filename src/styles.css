@@ -95,7 +95,8 @@ button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 .react-flow__controls { border: 1px solid #303741; box-shadow: none; border-radius: 7px; overflow: hidden; }
 .react-flow__controls-button { background: #12171d; border-bottom-color: #303741; fill: #bdc5cf; }
 .react-flow__controls-button:hover { background: #202832; }
-.react-flow__minimap { border: 1px solid #303741; border-radius: 8px; background: #0d1117; }
+.react-flow__minimap { width: 132px; height: 92px; border: 1px solid #303741; border-radius: 8px; background: #0d1117; }
+.react-flow__minimap svg { width: 100%; height: 100%; }
 .flow-legend { position: absolute; left: 16px; top: 14px; z-index: 4; display: flex; gap: 16px; color: #8791a0; font-size: 11px; border: 1px solid #262e37; background: rgba(12, 16, 21, .87); backdrop-filter: blur(8px); border-radius: 7px; padding: 7px 10px; }
 .flow-legend span { display: flex; align-items: center; gap: 6px; }
 .legend-line { width: 16px; border-top: 2px solid var(--green); }
