@@ -13,7 +13,7 @@ type LearningLayerProps = {
 
 /**
  * Deliberately separate from the operator panel above it. A real operator already
- * knows this material. This is onboarding scaffolding, so it gets its own colour
+ * knows this material. This is onboarding scaffolding, so it gets its own color
  * and can be switched off entirely.
  */
 export function LearningLayer({ node, openSection, onOpenSection, answer, onAnswer, quizOpen, onToggleQuiz }: LearningLayerProps) {

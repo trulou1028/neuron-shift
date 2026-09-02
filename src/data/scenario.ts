@@ -390,7 +390,7 @@ const authoredAsks: Record<string, { question: string; answer: string; cites: st
   ],
   "ups-a": [
     { question: "Why is estimated runtime falling?", answer: "Battery string impedance rose through the afternoon. Neuron attributes this to a cell-level fault in the string rather than a charger or load problem, at 0.82 confidence.", cites: ["ups-a"] },
-    { question: "Is the critical load still protected?", answer: "Yes. UPS-B1 is synchronised and holds 12.8 minutes of runtime on the redundant path serving the same PDU.", cites: ["ups-b", "pdu"] },
+    { question: "Is the critical load still protected?", answer: "Yes. UPS-B1 is synchronized and holds 12.8 minutes of runtime on the redundant path serving the same PDU.", cites: ["ups-b", "pdu"] },
     { question: "When does this become urgent?", answer: "Below 6.0 minutes of estimated runtime, or if UPS-B1 capacity falls. A battery-string inspection is already scheduled for 22:00.", cites: ["ups-a", "ups-b"] },
   ],
   "ups-b": [
@@ -398,7 +398,7 @@ const authoredAsks: Record<string, { question: string; answer: string; cites: st
     { question: "Is B affected by the same fault as A?", answer: "No. Impedance on the B string is flat and it sits in a separate battery cabinet on a separate branch from the switchgear.", cites: ["ups-b", "switchgear"] },
   ],
   pdu: [
-    { question: "Is there capacity headroom here?", answer: "371 kW at 72% utilised leaves roughly 144 kW of headroom, and phase balance is within tolerance.", cites: ["pdu"] },
+    { question: "Is there capacity headroom here?", answer: "371 kW at 72% utilized leaves roughly 144 kW of headroom, and phase balance is within tolerance.", cites: ["pdu"] },
     { question: "Which racks does this feed?", answer: "Racks R-42 and R-43. R-42 is the closer one to watch at 92% of its power budget.", cites: ["rack-42", "rack-43"] },
   ],
   "rack-42": [

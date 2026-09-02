@@ -40,7 +40,7 @@ export const recommendations: Recommendation[] = [
     confidence: 0.78,
     reversibility: "consequential",
     steps: [
-      "UPS-B1 is synchronised and in normal mode",
+      "UPS-B1 is synchronized and in normal mode",
       "PDU-05 phase balance is within tolerance",
       "Rack R-42 and R-43 both show healthy A and B feeds",
       "The 22:00 procedure is approved and a technician is assigned",
@@ -72,7 +72,7 @@ export const recommendations: Recommendation[] = [
     reversibility: "reversible",
     steps: ["Set the SWGR-A breaker loading alert to 92% until 07:00"],
     autonomy: [
-      { tier: "auto", label: "Summarise how often the alert has fired this shift" },
+      { tier: "auto", label: "Summarize how often the alert has fired this shift" },
       { tier: "approval", label: "Change the alert threshold" },
       { tier: "never", label: "Operate a breaker" },
       { tier: "never", label: "Rebalance load across the switchboard" },

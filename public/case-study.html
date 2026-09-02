@@ -338,7 +338,7 @@
   .field dd { margin: 0 0 8px; color: var(--ink-2); line-height: 1.55; }
   .field dd:last-of-type { margin-bottom: 0; }
 
-  /* ---------- Colour semantics ---------- */
+  /* ---------- Color semantics ---------- */
   .swatches { display: grid; gap: 10px; margin: 22px 0; }
   .swatch {
     display: grid;
@@ -474,7 +474,7 @@
     <div class="masthead-meta">
       <a class="btn btn-primary" href="/">Open the live prototype</a>
       <a class="btn btn-ghost" href="https://github.com/trulou1028/neuron-shift">Source on GitHub</a>
-      <span class="stamp">All data simulated · Labelled as such in the interface</span>
+      <span class="stamp">All data simulated · Labeled as such in the interface</span>
     </div>
   </header>
 
@@ -486,7 +486,7 @@
       <a href="#built">What is built</a>
       <a href="#chat">Position on chat</a>
       <a href="#decisions">Design decisions</a>
-      <a href="#colour">Colour semantics</a>
+      <a href="#color">Color semantics</a>
       <a href="#technical">Technical decisions</a>
       <a href="#next">What comes next</a>
       <a href="#limits">Deliberate limits</a>
@@ -619,7 +619,7 @@
           <div class="inv-row">
             <dt>Learning layer</dt>
             <dd>
-              An onboarding overlay in its own colour, off by default. Definitions, a glossary for the
+              An onboarding overlay in its own color, off by default. Definitions, a glossary for the
               acronyms on screen, and an optional self test.
             </dd>
           </div>
@@ -674,7 +674,7 @@
           </p>
           <dl class="field">
             <dt>Why</dt>
-            <dd>A promise about behaviour is more reassuring than a confidence score. Confidence says how sure the model is. The ladder says what it is allowed to do, which is the thing an operator actually needs to trust.</dd>
+            <dd>A promise about behavior is more reassuring than a confidence score. Confidence says how sure the model is. The ladder says what it is allowed to do, which is the thing an operator actually needs to trust.</dd>
           </dl>
         </article>
 
@@ -710,7 +710,7 @@
           <p>
             An earlier version of this prototype taught the domain inside the operator tool, with the same
             knowledge check attached to every asset. That was wrong. Real operators know what a power
-            distribution unit is. The teaching material is now a separate overlay in its own colour, off by
+            distribution unit is. The teaching material is now a separate overlay in its own color, off by
             default.
           </p>
           <dl class="field">
@@ -727,17 +727,17 @@
           </p>
           <dl class="field">
             <dt>Why</dt>
-            <dd>A widget that floats free is a dashboard tile that happens to sit on a canvas, and it gets nothing from the spatial layout. Anchoring makes the topology the organising principle.</dd>
+            <dd>A widget that floats free is a dashboard tile that happens to sit on a canvas, and it gets nothing from the spatial layout. Anchoring makes the topology the organizing principle.</dd>
             <dt>Extension</dt>
             <dd>The natural next step is that the pinned arrangement travels in the handoff. Widgets become the operator's working memory, and working memory should be inheritable.</dd>
           </dl>
         </article>
       </section>
 
-      <section id="colour">
+      <section id="color">
         <div class="section-head">
-          <span class="section-label">Colour semantics</span>
-          <h2>One meaning per colour</h2>
+          <span class="section-label">Color semantics</span>
+          <h2>One meaning per color</h2>
           <p>Amber was carrying two jobs badly. Splitting them was the highest value small change in the build.</p>
         </div>
 
@@ -773,7 +773,7 @@
         </p>
 
         <p>
-          The result is that the canvas shows where human judgement is outstanding, not just where the plant
+          The result is that the canvas shows where human judgment is outstanding, not just where the plant
           is unhappy. Both counts appear in the toolbar, and the red survives at fit to view zoom and in the
           minimap. Deciding both recommendations turns every red outline green by the end of the demo.
         </p>
@@ -879,7 +879,7 @@
         <ul class="clean">
           <li><strong>Put it in front of one real operator before adding anything.</strong> The decision record has six fields because six felt right to me, not because anyone who runs a facility told me so. That is the assumption most worth breaking early.</li>
           <li><strong>An authoring flow for the outgoing operator.</strong> Today the handoff is read only. The real design problem is the hard one: how do you get a tired operator at 18:55 to write one honest sentence explaining why? Everything downstream depends on solving that.</li>
-          <li><strong>A decision timeline.</strong> Scrub from the first anomaly to the current moment and watch model confidence and human decisions move together. It makes the relationship between evidence arriving and judgement changing visible.</li>
+          <li><strong>A decision timeline.</strong> Scrub from the first anomaly to the current moment and watch model confidence and human decisions move together. It makes the relationship between evidence arriving and judgment changing visible.</li>
           <li><strong>Challenge this assessment.</strong> Show supporting evidence, contradicting evidence, and missing evidence for a recommendation, then let the operator ask what would make the diagnosis wrong. Trust needs a way to argue back.</li>
           <li><strong>Widget layouts that travel in the handoff.</strong> Inherit the previous operator's arrangement, not only their notes.</li>
           <li><strong>Progressive node detail by zoom.</strong> At fit to view on a laptop the asset names are small. Detail should resolve as you zoom rather than being fixed.</li>
@@ -895,11 +895,11 @@
         <div class="limits">
           <ul class="clean">
             <li><strong>Every value is simulated.</strong> Names, times, thresholds, and procedures are fictional, and the interface says so in three places rather than hiding it.</li>
-            <li><strong>No model is called.</strong> The reasoning and the confidence figures are written, and labelled as illustrative wherever they appear.</li>
-            <li><strong>Generators are not modelled.</strong> So a utility failure shows everything dropping. The impact panel states this rather than quietly implying the site has no backup.</li>
+            <li><strong>No model is called.</strong> The reasoning and the confidence figures are written, and labeled as illustrative wherever they appear.</li>
+            <li><strong>Generators are not modeled.</strong> So a utility failure shows everything dropping. The impact panel states this rather than quietly implying the site has no backup.</li>
             <li><strong>Domain assumptions are flagged in the interface</strong>, on the assets where I was least confident, so an expert can correct me instead of guessing what I assumed.</li>
             <li><strong>No authentication, no server, no real telemetry.</strong> Persistence is the browser's local storage only.</li>
-            <li><strong>I do not claim to know data centre operations.</strong> I claim to have learned enough to build something an expert can correct, and to have marked exactly where the corrections should go.</li>
+            <li><strong>I do not claim to know data center operations.</strong> I claim to have learned enough to build something an expert can correct, and to have marked exactly where the corrections should go.</li>
           </ul>
         </div>
       </section>
@@ -917,7 +917,7 @@
         </p>
 
         <p>
-          I mention it because it is how the work actually happened, and because the interesting artefact is
+          I mention it because it is how the work actually happened, and because the interesting artifact is
           not the code. It is the sequence of decisions: what to build, in what order, what to refuse, and
           which of my own earlier choices to throw away. The quiz attached to every asset and the free
           floating learning panel were both mine, and both were wrong, and cutting them made the product

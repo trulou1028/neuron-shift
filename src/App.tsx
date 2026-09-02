@@ -127,7 +127,7 @@ export function App() {
   }, [pulseId]);
 
   // Amber says the equipment has a condition. Red says a human owes a decision.
-  // They are different axes, so they get different colours.
+  // They are different axes, so they get different colors.
   const reviewState = useMemo(() => {
     const map: Record<string, "review" | "decided"> = {};
     for (const item of recommendations) {
@@ -173,20 +173,20 @@ export function App() {
       connections.map(([source, target]) => {
         const id = `${source}-${target}`;
         const affected = traceActive && affectedPath.has(id);
-        const deEnergised = impact ? impact.failed === source || impact.failed === target || impact.dropped.includes(target) : false;
-        const color = deEnergised ? palette.danger : affected ? palette.amber : palette.green;
+        const deEnergized = impact ? impact.failed === source || impact.failed === target || impact.dropped.includes(target) : false;
+        const color = deEnergized ? palette.danger : affected ? palette.amber : palette.green;
         return {
           id,
           source,
           target,
           type: "smoothstep",
-          animated: affected && !deEnergised,
+          animated: affected && !deEnergized,
           markerEnd: { type: MarkerType.ArrowClosed, color },
           style: {
             stroke: color,
-            strokeWidth: deEnergised || affected ? 2.4 : 1.4,
-            opacity: impact && !deEnergised ? 0.22 : affected || deEnergised ? 1 : 0.58,
-            strokeDasharray: deEnergised ? "5 4" : undefined,
+            strokeWidth: deEnergized || affected ? 2.4 : 1.4,
+            opacity: impact && !deEnergized ? 0.22 : affected || deEnergized ? 1 : 0.58,
+            strokeDasharray: deEnergized ? "5 4" : undefined,
           },
         };
       }),
@@ -370,7 +370,7 @@ export function App() {
               <span><i className="legend-line legend-line--green" /> Normal flow</span>
               <span><i className="legend-line legend-line--amber" /> Investigated path</span>
               {impact ? (
-                <span><i className="legend-line legend-line--danger" /> De-energised if this fails</span>
+                <span><i className="legend-line legend-line--danger" /> De-energized if this fails</span>
               ) : needsReviewCount > 0 ? (
                 <span><i className="legend-ring" /> Needs your review</span>
               ) : (

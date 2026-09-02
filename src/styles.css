@@ -285,7 +285,7 @@ a.prototype-pill:hover { color: #dbe9ff; border-color: #3a67a2; }
 .react-flow__node.impact-held .power-node { border-color: #24774d; box-shadow: 0 0 0 1px rgba(52,210,123,.2); }
 .react-flow__node.impact-muted .power-node { opacity: .32; }
 
-/* Learning layer: deliberately a different colour from the operator tool */
+/* Learning layer: deliberately a different color from the operator tool */
 .learning-layer { border-top: 1px solid #2a2340; background: #100e1a; padding: 14px 18px 22px; margin-top: auto; }
 .learning-layer__head { display: flex; align-items: center; gap: 7px; color: var(--violet); font-size: 11.5px; font-weight: 600; margin-bottom: 10px; }
 .learning-layer__head span { color: #6f6494; font-size: 10.5px; font-weight: 500; margin-left: auto; text-align: right; line-height: 1.3; }
