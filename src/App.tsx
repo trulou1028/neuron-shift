@@ -11,7 +11,7 @@ import {
   type NodeSelectionChange,
   type OnNodesChange,
 } from "@xyflow/react";
-import { Bell, ClipboardText, FlowArrow, Gauge, GraduationCap } from "@phosphor-icons/react";
+import { ArrowUpRight, Bell, ClipboardText, FlowArrow, Gauge, GraduationCap } from "@phosphor-icons/react";
 import {
   affectedPath,
   connections,
@@ -283,7 +283,9 @@ export function App() {
           <div><strong>NEURON</strong><span>Shift</span></div>
         </div>
         <div className="top-actions">
-          <span className="prototype-pill">Exploratory prototype</span>
+          <a className="prototype-pill" href="/case-study" title="Read how and why this was built">
+            Exploratory prototype <ArrowUpRight size={12} weight="bold" />
+          </a>
           <button id="open-shift-brief" className="ghost-button" aria-haspopup="dialog" onClick={() => setBriefOpen(true)}>
             <ClipboardText size={15} /> Shift brief
           </button>

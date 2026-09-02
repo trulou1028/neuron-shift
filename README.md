@@ -86,6 +86,10 @@ Not built:
 - Authentication or persistence beyond the browser's local storage
 - Validated electrical engineering calculations
 
+## Case study
+
+A written brief covering the premise, the design and technical decisions, and where this would go next is served with the app at [/case-study](https://neuron-shift.vercel.app/case-study). The source is `public/case-study.html`, a standalone static page rather than a route inside the React app, so it adds nothing to the bundle.
+
 ## Stack
 
 - Vite

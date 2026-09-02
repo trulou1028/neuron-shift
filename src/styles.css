@@ -21,7 +21,8 @@ button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 .brand-lockup strong { font-size: 13px; letter-spacing: .1em; }
 .brand-lockup div span { font-size: 11px; color: var(--muted); }
 .top-actions { display: flex; align-items: center; gap: 10px; }
-.prototype-pill { color: #a4adba; font-size: 11px; border: 1px solid #303641; background: #181c22; border-radius: 999px; padding: 5px 10px; }
+.prototype-pill { display: inline-flex; align-items: center; gap: 5px; color: #a4adba; font-size: 11px; border: 1px solid #303641; background: #181c22; border-radius: 999px; padding: 5px 10px; text-decoration: none; transition: color .15s, border-color .15s; }
+a.prototype-pill:hover { color: #dbe9ff; border-color: #3a67a2; }
 .icon-button { width: 34px; height: 34px; display: grid; place-items: center; border: 0; background: transparent; color: #aab2be; cursor: pointer; border-radius: 8px; }
 .icon-button:hover { background: #1a1f26; }
 .avatar { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: #242a32; color: #d8dde4; font-size: 11px; font-weight: 700; }
