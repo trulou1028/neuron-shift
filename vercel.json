@@ -5,7 +5,7 @@
   "cleanUrls": true,
   "rewrites": [
     { "source": "/case-study", "destination": "/case-study.html" },
-    { "source": "/((?!assets/|case-study).*)", "destination": "/index.html" }
+    { "source": "/((?!assets/).*)", "destination": "/index.html" }
   ],
   "headers": [
     {
