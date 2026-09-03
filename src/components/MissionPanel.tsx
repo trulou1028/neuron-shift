@@ -33,7 +33,8 @@ export function MissionPanel({ activeStep, traceActive, honestyOpen, onToggleHon
           <ShieldCheck size={16} />
           <span>
             <strong>Learning honestly</strong>
-            Values are simulated. Industry assumptions are labeled in the Learning Lens so an expert can correct them.
+            An independent concept prototype, not affiliated with or endorsed by Teserac. Every value is
+            simulated, and industry assumptions are labeled so an expert can correct them.
           </span>
         </div>
       )}

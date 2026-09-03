@@ -18,8 +18,8 @@ button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 .brand-lockup { display: flex; align-items: center; gap: 10px; }
 .brand-mark { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; color: var(--cyan); background: #09242c; border: 1px solid #145363; }
 .brand-lockup div { display: flex; flex-direction: column; line-height: 1; gap: 4px; }
-.brand-lockup strong { font-size: 13px; letter-spacing: .1em; }
-.brand-lockup div span { font-size: 11px; color: var(--muted); }
+.brand-lockup strong { font-size: 14px; font-weight: 700; letter-spacing: .16em; }
+.brand-lockup div span { font-size: 10.5px; color: var(--muted); letter-spacing: .04em; }
 .top-actions { display: flex; align-items: center; gap: 10px; }
 .prototype-pill { display: inline-flex; align-items: center; gap: 5px; color: #a4adba; font-size: 11px; border: 1px solid #303641; background: #181c22; border-radius: 999px; padding: 5px 10px; text-decoration: none; transition: color .15s, border-color .15s; }
 a.prototype-pill:hover { color: #dbe9ff; border-color: #3a67a2; }

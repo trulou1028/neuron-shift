@@ -140,7 +140,10 @@ export function ShiftBrief({ minutesSinceHandoff, decisions, onStartShift, onOpe
         )}
 
         <div className="shift-brief__footer">
-          <small>Simulated handoff. Names, times, and thresholds are fictional.</small>
+          <small>
+            Independent concept prototype, not affiliated with Teserac.<br />
+            Simulated handoff. Names, times, and thresholds are fictional.
+          </small>
           <button id="start-shift" className="start-shift" onClick={onStartShift}>
             Start shift <ArrowRight size={16} weight="bold" />
           </button>
