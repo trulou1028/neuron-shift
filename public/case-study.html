@@ -296,6 +296,15 @@
     margin-top: 14px;
   }
 
+  h3.sub {
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    font-size: 17.5px;
+    font-weight: 600;
+    letter-spacing: -.01em;
+    margin: 30px 0 10px;
+    text-wrap: balance;
+  }
+
   /* ---------- Decision entries ---------- */
   .entry {
     background: var(--surface);
@@ -483,6 +492,7 @@
     <nav class="rail" aria-label="Sections">
       <div class="rail-title">Contents</div>
       <a href="#premise">Premise</a>
+      <a href="#who">Who it is for</a>
       <a href="#built">What is built</a>
       <a href="#chat">Position on chat</a>
       <a href="#decisions">Design decisions</a>
@@ -568,6 +578,93 @@
             gets inherited.
           </figcaption>
         </figure>
+      </section>
+
+
+      <section id="who">
+        <div class="section-head">
+          <span class="section-label">Who it is for</span>
+          <h2>The operator who takes control at 19:00</h2>
+          <p>Not the facility. Not the fleet. One person, at one moment, with a building to answer for.</p>
+        </div>
+
+        <p>
+          The organization buying this runs mission critical facilities around the clock. Colocation
+          providers, hyperscale operators, and enterprises with their own data halls. What they sell is
+          uptime, and uptime is defended by a small team that is physically present twenty four hours a day.
+        </p>
+
+        <p>
+          The user is one of those people, and specifically the one <em>arriving</em> rather than the one
+          leaving. Every design decision in this prototype was made for them.
+        </p>
+
+        <dl class="inventory">
+          <div class="inv-row">
+            <dt>The role</dt>
+            <dd>Critical facilities technician, shift engineer, or data center operations engineer. The title moves around by operator; the accountability does not.</dd>
+          </div>
+          <div class="inv-row">
+            <dt>Where they came from</dt>
+            <dd>Often a trade or a military route. Electricians, HVAC technicians, and Navy trained power plant operators are all common paths into the seat.</dd>
+          </div>
+          <div class="inv-row">
+            <dt>The rhythm</dt>
+            <dd>Twelve hour shifts on rotation. Handover happens twice a day, every day, permanently. It is the most repeated moment in the entire operation.</dd>
+          </div>
+          <div class="inv-row">
+            <dt>Answerable for</dt>
+            <dd>Uptime, safe switching, executing approved procedures, and knowing the moment something needs to go up the chain.</dd>
+          </div>
+          <div class="inv-row">
+            <dt>Tools they live in</dt>
+            <dd>A building management system, an electrical power monitoring system, a work order system, and a shift log that is frequently a notebook or a spreadsheet.</dd>
+          </div>
+          <div class="inv-row">
+            <dt>The pressure</dt>
+            <dd>The deepest experience in the room is retiring. The people replacing it have a fraction of the years, and the knowledge that is leaving was never written down.</dd>
+          </div>
+        </dl>
+
+        <h3 class="sub">What actually makes the handoff hard</h3>
+        <p>Three things, and only one of them is a data problem.</p>
+
+        <ul class="clean">
+          <li><strong>The window is short.</strong> A handover is fifteen to thirty minutes, often less, and it competes with everything else happening at the top of a shift. Nobody reads a twelve hour history.</li>
+          <li><strong>The valuable information is the negative space.</strong> The outgoing operator knows what they looked at and deliberately chose to leave alone. That set is invisible to everyone else, and it never survives a verbal handover.</li>
+          <li><strong>The costliest mistake is undoing a decision.</strong> Not missing an alarm. Touching something a colleague deliberately left in place, without knowing they had a reason, is how a stable situation becomes an incident.</li>
+        </ul>
+
+        <p>
+          That third point is why the decision record has a <em>why</em> field and a <em>who</em> field, and
+          why deferring a recommendation forces you to name the trigger that brings it back. The format is
+          not a documentation exercise. It is the specific shape of the failure it prevents.
+        </p>
+
+        <h3 class="sub">Who else is in frame</h3>
+
+        <ul class="clean">
+          <li><strong>The outgoing operator</strong> produces the record but never reads it. They are the least served person in this prototype, and closing that gap is the first thing I would build.</li>
+          <li><strong>The chief engineer or facility manager</strong> would want the decision history as an audit trail, particularly after an incident. The data model supports it; no view has been built for it.</li>
+          <li><strong>The new operator</strong> is who the learning layer serves. They are deliberately not the core user, which is exactly why that layer is separable and switched off by default.</li>
+        </ul>
+
+        <div class="limits">
+          <h3 class="sub" style="margin-top:0">What I do not know about them</h3>
+          <p>
+            This profile is built from public material and reasoning. I have not interviewed a single
+            operator, so it should be read as a stated hypothesis rather than a finding.
+          </p>
+          <ul class="clean">
+            <li>Whether six fields is the right shape for a decision record, or whether an operator under time pressure would fill in two and leave the rest.</li>
+            <li>Whether the handoff moment is genuinely felt as a problem, or whether the existing verbal ritual works better than it looks from outside.</li>
+            <li>Whether "what you need to do" is welcome, or reads as a previous shift telling a peer how to do their job.</li>
+          </ul>
+          <p style="margin-bottom:0">
+            Each of those is answerable in one conversation with one operator, which is why that sits at the
+            top of what comes next.
+          </p>
+        </div>
       </section>
 
       <section id="built">
