@@ -305,6 +305,21 @@
     text-wrap: balance;
   }
 
+  .verdict {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 3px;
+    margin-right: 8px;
+    white-space: nowrap;
+  }
+  .verdict-yes { color: var(--good); background: var(--good-soft); }
+  .verdict-part { color: var(--warn); background: var(--warn-soft); }
+  .verdict-no { color: var(--crit); background: var(--crit-soft); }
+
   /* ---------- Decision entries ---------- */
   .entry {
     background: var(--surface);
@@ -500,6 +515,7 @@
       <a href="#technical">Technical decisions</a>
       <a href="#next">What comes next</a>
       <a href="#limits">Deliberate limits</a>
+      <a href="#open">The open question</a>
       <a href="#process">How it was built</a>
     </nav>
 
@@ -998,6 +1014,204 @@
             <li><strong>No authentication, no server, no real telemetry.</strong> Persistence is the browser's local storage only.</li>
             <li><strong>I do not claim to know data center operations.</strong> I claim to have learned enough to build something an expert can correct, and to have marked exactly where the corrections should go.</li>
           </ul>
+        </div>
+      </section>
+
+
+      <section id="open">
+        <div class="section-head">
+          <span class="section-label">Exploration</span>
+          <h2>Can someone without expertise save the building?</h2>
+          <p>An open question, explored rather than answered. Nothing below is built.</p>
+        </div>
+
+        <div class="thesis">
+          <p style="margin-bottom:0">
+            If a facility were minutes from going down, and the only person on site was the newest
+            member of the team, could an intelligence layer carry them? Or is software of this kind
+            permanently reserved for people who already hold the expertise?
+          </p>
+        </div>
+
+        <p>
+          The question is not specific to data centers. The same shift is running through tax
+          preparation, investing, software, and medicine: expertise is scarce, software is cheap, and
+          capability keeps moving toward people with less training. Physical AI is doing the same thing
+          to machines. It is worth asking directly whether critical facilities are part of that trend or
+          an exception to it.
+        </p>
+
+        <p>
+          My reading is that the question is badly posed, and that fixing the framing produces a more
+          useful answer than arguing about the original.
+        </p>
+
+        <h3 class="sub">The question is really four questions</h3>
+
+        <p>
+          Any operational act contains four capabilities. Expertise is not spread evenly across them, and
+          software does not move them equally. Treating them as one thing is what makes the debate
+          circular.
+        </p>
+
+        <dl class="inventory">
+          <div class="inv-row">
+            <dt>Detection</dt>
+            <dd>
+              <span class="verdict verdict-yes">Transfers</span>
+              Noticing that something is wrong. A newcomer with instrumentation detects better than an
+              expert without it. Neuron already does this, and it is the least interesting part of the
+              question.
+            </dd>
+          </div>
+          <div class="inv-row">
+            <dt>Diagnosis</dt>
+            <dd>
+              <span class="verdict verdict-yes">Transfers</span>
+              Knowing what is wrong and why. This holds for failures the system has a model of. It breaks
+              on compound and novel failures, which are the ones that take buildings down.
+            </dd>
+          </div>
+          <div class="inv-row">
+            <dt>Decision</dt>
+            <dd>
+              <span class="verdict verdict-part">Partly</span>
+              Choosing what to do. The deciding input is often something the system cannot see. A
+              technician is already inside the cabinet. A customer migration runs tonight. The same move
+              tripped something two rooms away last year.
+            </dd>
+          </div>
+          <div class="inv-row">
+            <dt>Execution</dt>
+            <dd>
+              <span class="verdict verdict-no">Does not</span>
+              Performing the act. This is not a software limit and no interface will move it. Arc flash
+              injures and kills. Qualified-person rules, lockout-tagout, and protective equipment exist
+              because people died establishing that they were necessary.
+            </dd>
+          </div>
+        </dl>
+
+        <p>
+          So the honest answer is split. Detection and diagnosis transfer now. Decision transfers under
+          conditions. Execution does not transfer at all, and should not. Any pitch that skips this
+          distinction will not survive a conversation with someone who has stood in front of an energized
+          switchboard.
+        </p>
+
+        <h3 class="sub">What other fields already learned</h3>
+
+        <p>Four software cases, ordered by how completely the transfer worked.</p>
+
+        <ul class="clean">
+          <li><strong>Tax preparation.</strong> The rules are finite and already written down. An error is amendable and the consequence arrives months later. The transfer was close to total.</li>
+          <li><strong>Automated investing.</strong> Allocation rules encode well. Consequences are delayed and spread across a portfolio. The transfer worked inside guardrails that regulators set.</li>
+          <li><strong>Code assistants.</strong> Version control makes almost every mistake reversible in seconds. That property, not model quality, is why this field moved fastest.</li>
+          <li><strong>Clinical decision support.</strong> Where the pattern breaks. Alerts fire constantly, staff learn to dismiss them, and the signal is lost inside the noise. Being correct is not sufficient. The system has to be correct at a rate that sustains attention.</li>
+        </ul>
+
+        <p>Physical AI has run the same experiment on machines, and the results are sharper.</p>
+
+        <ul class="clean">
+          <li><strong>Consumer drones.</strong> The strongest case. Stabilization, geofencing, and return-to-home removed the failure modes instead of training the pilot. A beginner flies competently on day one because the dangerous states are unreachable, not because they learned to avoid them.</li>
+          <li><strong>Driver assistance.</strong> The instructive failure. Conditional automation, where the vehicle drives and hands control back on request, concentrates the danger in the handback. The human is least practiced at the moment the situation is hardest. Several manufacturers skipped that level rather than solve it.</li>
+          <li><strong>Surgical robotics.</strong> A counter-example worth holding onto. It amplifies a trained surgeon and lowers no training requirement at all. Some physical AI raises the ceiling instead of the floor.</li>
+          <li><strong>Collaborative robots.</strong> Safety comes from physics rather than procedure. Force and speed limits make the machine safe next to an untrained person without that person knowing anything about it.</li>
+        </ul>
+
+        <p>
+          The driver assistance case is the one that should worry anyone building this, because
+          <em>Neuron's approval gate is a handback.</em> The system carries the situation, then stops and
+          asks a human to take control at the least convenient moment. That is the exact shape that has
+          proven hardest to make safe in vehicles.
+        </p>
+
+        <h3 class="sub">The variable that predicts whether it works</h3>
+
+        <p>
+          Across every case above, one pair of properties predicts the outcome: how reversible the mistake
+          is, and how quickly the consequence arrives. Tax errors are reversible and slow, so the transfer
+          was total. Defibrillation is irreversible and immediate, so the scope was cut to almost nothing
+          and the remaining act was made impossible to get wrong.
+        </p>
+
+        <div class="thesis">
+          <p style="margin-bottom:0">
+            Hand capability downward in proportion to reversibility.
+          </p>
+        </div>
+
+        <p>
+          This prototype already applies that rule to actions: raising an alert threshold is one click,
+          transferring critical load requires every pre-flight step acknowledged and the asset name typed
+          back. Extending it to people is the same rule with a second input. The gate becomes a function
+          of the action and of who is holding it.
+        </p>
+
+        <h3 class="sub">The counter-effect that rarely gets priced in</h3>
+
+        <p>
+          Lisanne Bainbridge described this in 1983, in a paper called <em>Ironies of Automation</em>. The
+          more a system automates, the more the remaining human role shrinks to exactly the situations the
+          automation could not handle. Those are the hardest situations. And the human now has far less
+          practice, because the routine work that built their intuition has been absorbed.
+        </p>
+
+        <p>
+          Air France 447 is the reference case. The autopilot disengaged after the airspeed sensors iced,
+          and the crew's manual handling had degraded. Three Mile Island is the older one: the information
+          was present and presented so poorly that trained operators reached the wrong conclusion.
+        </p>
+
+        <p>
+          Applied here, the risk is direct. If Neuron absorbs everything routine, it may produce operators
+          who never build the pattern library that made the retiring generation valuable.
+          <strong>A tool aimed at the expertise shortage can deepen it.</strong> That is a real tension in
+          this product, not a rhetorical one.
+        </p>
+
+        <h3 class="sub">Where I think this lands</h3>
+
+        <p>
+          In an actual emergency, the newest person's realistic contribution is almost never executing the
+          fix. It is three things: do not make it worse, buy time, and get the right human there faster
+          with better context.
+        </p>
+
+        <p>
+          The third one is where software changes the outcome, and this prototype already contains the
+          artifact for it. The decision record is a handoff pointed forward in time. Pointed sideways it
+          becomes an escalation packet: what changed, what I saw, what I already tried, what I did not
+          touch and why. The expert arrives with seconds of ramp-up instead of twenty minutes.
+        </p>
+
+        <p>
+          That reframes the goal from novice as hero, which is not credible, to novice as competent first
+          responder, which is. It is the defibrillator pattern. Narrow the scope until the remaining
+          decision is one an untrained person can make correctly, make the harmful path unavailable rather
+          than discouraged, and keep the human for the part the machine cannot do.
+        </p>
+
+        <div class="limits">
+          <h3 class="sub" style="margin-top:0">What I would want to test</h3>
+          <p>
+            Each of these is falsifiable, which is the point of writing them down rather than asserting a
+            conclusion.
+          </p>
+          <ul class="clean">
+            <li>Whether a junior operator handed a bounded set of pre-authorized reversible actions performs better than one handed the full interface, or freezes because the boundary itself reads as a warning.</li>
+            <li>Whether an escalation packet measurably shortens an expert's ramp-up time, and whether experts trust a packet assembled by someone they consider unqualified.</li>
+            <li>Whether authority that widens during an emergency, the way it does during a hospital code, is acceptable to the people who carry the liability.</li>
+            <li>Whether operators who work alongside a system like this retain diagnostic skill over a year, or lose it. This is the one that needs longitudinal data and the one nobody funds.</li>
+          </ul>
+          <p style="margin-bottom:0">
+            The deeper question sits underneath all four. Does an intelligence layer raise the floor, or
+            lower the ceiling? Raising the floor is the pitch. Lowering the ceiling is the risk: experts
+            atrophy, and the system's model quietly becomes the limit of what anyone thinks to consider.
+            Designing for the floor without capping the ceiling means the expert must always be able to
+            see past the recommendation, into the raw signals, the rejected hypotheses, and the
+            assumptions. Which turns the challenge surface from a refinement into a requirement.
+          </p>
         </div>
       </section>
 
