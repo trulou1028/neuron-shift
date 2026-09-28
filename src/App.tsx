@@ -430,7 +430,7 @@ function Console() {
           <button id="open-shift-brief" className="button button--secondary" aria-haspopup="dialog" onClick={() => setBriefOpen(true)}>
             <ClipboardText size={14} weight="bold" /> Shift brief
           </button>
-          <a className="prototype-link" href="/case-study" data-tour="case-study" title="Read how and why this was built">
+          <a className="prototype-link" href="/case-study.html" data-tour="case-study" title="Read how and why this was built">
             Concept prototype · Case study <ArrowUpRight size={12} weight="bold" />
           </a>
           <span className="avatar" title="Signed in as Louie, the incoming operator">LS</span>

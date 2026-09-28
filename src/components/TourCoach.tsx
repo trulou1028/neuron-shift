@@ -239,7 +239,7 @@ export function TourCoach({ step, index, taskDone, canDo, onDo, onNext, onSkip, 
               {isDone && (
                 <>
                   <button className="button button--quiet" onClick={onFinish}>Keep exploring</button>
-                  <a className="button button--primary" href="/case-study" onClick={onFinish}>
+                  <a className="button button--primary" href="/case-study.html" onClick={onFinish}>
                     Read the case study <ArrowUpRight size={14} weight="bold" />
                   </a>
                 </>

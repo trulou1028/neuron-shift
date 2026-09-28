@@ -74,7 +74,7 @@ export function PhoneFallback() {
       </div>
 
       <div className="phone__actions">
-        <a className="button button--primary button--large" href="/case-study">
+        <a className="button button--primary button--large" href="/case-study.html">
           Read the case study <ArrowUpRight size={15} weight="bold" />
         </a>
         <button className="button button--secondary button--large" onClick={copyLink}>
