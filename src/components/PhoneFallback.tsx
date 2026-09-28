@@ -83,7 +83,7 @@ export function PhoneFallback() {
         </button>
       </div>
 
-      <footer className="phone__foot">Independent concept prototype, not affiliated with Teserac. All values are simulated.</footer>
+      <footer className="phone__foot">Independent concept prototype, not affiliated with or endorsed by any company. All values are simulated.</footer>
     </main>
   );
 }

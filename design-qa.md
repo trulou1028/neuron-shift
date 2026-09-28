@@ -1,6 +1,6 @@
 # Design QA
 
-QA record for the portfolio revamp (September 2026). The source of truth is `DESIGN.md` for the visual system and `PRODUCT.md` for the principles. There is no reference mock. The earlier QA pass against the Teserac-inspired mock no longer applies and was replaced by this record.
+QA record for the portfolio revamp (September 2026). The source of truth is `DESIGN.md` for the visual system and `PRODUCT.md` for the principles. There is no reference mock. The earlier QA pass against the original reference mock no longer applies and was replaced by this record.
 
 ## Evidence
 

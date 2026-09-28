@@ -13,7 +13,7 @@ Two audiences, one surface.
 
 ## Product Purpose
 
-Neuron Shift is an independent concept prototype. It explores how operational judgment transfers between people in 24/7 data center operations: a structured shift handoff, AI that attaches to assets instead of a chat box, and human-in-the-loop decisions that become the record the next shift inherits. It is not affiliated with Teserac.
+Neuron Shift is an independent concept prototype. It explores how operational judgment transfers between people in 24/7 data center operations: a structured shift handoff, AI that attaches to assets instead of a chat box, and human-in-the-loop decisions that become the record the next shift inherits. It is not affiliated with or endorsed by any company.
 
 Success: a visitor who explores alone for two minutes can say what the handoff preserves, why an asset is red, and why approving one recommendation took more effort than the other.
 
@@ -25,7 +25,7 @@ Precise, calm, expert. It should feel like a well-made instrument: exact numbers
 
 - Sci-fi HUD interfaces: glowing cyan everything, scan lines, hexagons, fake 3D.
 - Generic SaaS dashboards: rounded cards in identical grids, a blue primary button on every surface, hero metrics with gradient accents.
-- The original Teserac-inspired look this project started from. The new identity is Louie's own.
+- The original look this project started from. The new identity is Louie's own.
 - Chat-first AI products. There is deliberately no prompt box.
 
 ## Design Principles

@@ -165,7 +165,7 @@ export function ShiftBrief({ minutesSinceHandoff, decisions, openItem, onToggleI
 
         <footer className="shift-brief__footer">
           <small>
-            Independent concept prototype, not affiliated with Teserac.<br />
+            Independent concept prototype, not affiliated with or endorsed by any company.<br />
             Simulated handoff. Names, times, and thresholds are fictional.
           </small>
           <button id="start-shift" className="button button--primary button--large" onClick={onStartShift}>

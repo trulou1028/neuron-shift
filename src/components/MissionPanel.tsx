@@ -35,7 +35,7 @@ export function MissionPanel({ activeStep, traceActive, honestyOpen, onToggleHon
               <ShieldCheck size={15} />
               <span>
                 <strong>Learning honestly</strong>
-                An independent concept prototype, not affiliated with or endorsed by Teserac. Every value is
+                An independent concept prototype, not affiliated with or endorsed by any company. Every value is
                 simulated, and industry assumptions are labeled so an expert can correct them.
               </span>
             </div>
