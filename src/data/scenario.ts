@@ -14,15 +14,18 @@ export type PowerNodeData = {
   assumption?: boolean;
   /** Set per render. "review" means a human owes a decision here; "decided" means one was made. */
   review?: "review" | "decided";
+  /** Set per render while the failure preview is on. */
+  impact?: "failed" | "dropped" | "held";
 };
 
 export type PowerNode = Node<PowerNodeData, "power">;
 
+// Laid out top to bottom, source to load, the way electrical one-line diagrams are usually drawn.
 export const powerNodes: PowerNode[] = [
   {
     id: "utility",
     type: "power",
-    position: { x: 0, y: 190 },
+    position: { x: -88, y: 0 },
     data: {
       eyebrow: "Source",
       title: "Utility feed A",
@@ -37,7 +40,7 @@ export const powerNodes: PowerNode[] = [
   {
     id: "transformer",
     type: "power",
-    position: { x: 196, y: 190 },
+    position: { x: -88, y: 130 },
     data: {
       eyebrow: "Step-down",
       title: "Transformer T-01",
@@ -52,7 +55,7 @@ export const powerNodes: PowerNode[] = [
   {
     id: "switchgear",
     type: "power",
-    position: { x: 392, y: 190 },
+    position: { x: -88, y: 260 },
     data: {
       eyebrow: "Distribution",
       title: "Switchgear SWGR-A",
@@ -68,7 +71,7 @@ export const powerNodes: PowerNode[] = [
   {
     id: "ups-a",
     type: "power",
-    position: { x: 588, y: 60 },
+    position: { x: -208, y: 400 },
     data: {
       eyebrow: "Backup path A",
       title: "UPS-A1",
@@ -84,7 +87,7 @@ export const powerNodes: PowerNode[] = [
   {
     id: "ups-b",
     type: "power",
-    position: { x: 588, y: 320 },
+    position: { x: 32, y: 400 },
     data: {
       eyebrow: "Backup path B",
       title: "UPS-B1",
@@ -100,7 +103,7 @@ export const powerNodes: PowerNode[] = [
   {
     id: "pdu",
     type: "power",
-    position: { x: 784, y: 190 },
+    position: { x: -88, y: 540 },
     data: {
       eyebrow: "Room distribution",
       title: "PDU-05",
@@ -115,7 +118,7 @@ export const powerNodes: PowerNode[] = [
   {
     id: "rack-42",
     type: "power",
-    position: { x: 980, y: 110 },
+    position: { x: -208, y: 680 },
     data: {
       eyebrow: "IT load",
       title: "Rack R-42",
@@ -130,7 +133,7 @@ export const powerNodes: PowerNode[] = [
   {
     id: "rack-43",
     type: "power",
-    position: { x: 980, y: 270 },
+    position: { x: 32, y: 680 },
     data: {
       eyebrow: "IT load",
       title: "Rack R-43",
@@ -154,6 +157,24 @@ export const connections: [string, string][] = [
   ["pdu", "rack-42"],
   ["pdu", "rack-43"],
 ];
+
+/** Hops from the utility source. Drives the order in which the graph powers up. */
+export const nodeDepth: Record<string, number> = (() => {
+  const depth: Record<string, number> = {};
+  const roots = powerNodes.filter((node) => !connections.some(([, target]) => target === node.id));
+  const queue = roots.map((node) => node.id);
+  queue.forEach((id) => (depth[id] = 0));
+  while (queue.length > 0) {
+    const current = queue.shift() as string;
+    for (const [source, target] of connections) {
+      if (source === current && depth[target] === undefined) {
+        depth[target] = depth[current] + 1;
+        queue.push(target);
+      }
+    }
+  }
+  return depth;
+})();
 
 export const affectedPath = new Set(["utility-transformer", "transformer-switchgear", "switchgear-ups-a", "ups-a-pdu", "pdu-rack-42"]);
 

@@ -15,7 +15,7 @@ The handoff attacks the moment responsibility changes hands. The anchored AI att
 
 ### A position on autonomy
 
-Color carries one meaning each. Amber says the equipment has a condition. Red says a human owes a decision. Those are different axes, so a rack sitting at 92% of its budget stays amber, while an asset with an undecided recommendation goes red, pulses, and says "Needs your review" on the card itself. Deciding clears it. The canvas therefore shows where human judgment is outstanding, not just where the plant is unhappy.
+Color carries one meaning each. Amber says the equipment has a condition. Red says a human owes a decision. Those are different axes, so a rack sitting at 92% of its budget stays amber, while an asset with an undecided recommendation goes red, pulses, and says "Needs your decision" on the card itself. Deciding clears it. The canvas therefore shows where human judgment is outstanding, not just where the plant is unhappy.
 
 Autonomy should be visible rather than implied. Every recommendation shows what Neuron may do alone, what needs approval, and what it must never touch. That is a promise about behavior, which is more reassuring than any confidence score.
 
@@ -31,22 +31,28 @@ Chat is the right fallback and the wrong default. It asks the operator to supply
 
 This prototype is intentionally honest about domain uncertainty. Values are simulated, and assumptions that should be validated with subject-matter experts are labeled in the interface.
 
+## Guided tour
+
+Most visitors open the prototype from a portfolio with nobody presenting it. On a first visit a guided tour starts beside the Shift Brief. It points at real interface in seven steps and asks the visitor to use it: open the handoff, jump to the graph, read the colors, preview two failures, record a decision, and turn on the learning layer. Each step completes when the app reaches the state it asks for, however the visitor got there, and "Do it for me" buttons let a visitor watch it play instead. **Guided tour** in the top bar replays it from a clean state. The steps live in `src/data/tour.ts`.
+
+On a screen narrower than 1000 pixels the console does not fit, so the app shows a short phone page instead: the idea, what the colors mean, a link to the case study, and a prompt to open the link on a laptop.
+
 ## Two-minute interview walkthrough
 
-The Shift Brief opens on load. Present it first.
+The Shift Brief opens on load. Present it first. The graph behind it is unpowered. It powers up from the utility feed down to the racks when you take the shift.
 
 1. **Read the handoff.** "Sarah Chen handed Louie the site at 19:00." Two items need attention, one is listed so the incoming operator knows it was investigated. Every collapsed row already shows its "what you need to do" line.
 2. **Expand item 01 and read it slowly.** The six rows are the product: what changed, what we know, what was decided, why, who decided, what you need to do. The last row is an instruction with a threshold the previous operator chose.
 3. **Point at "What changed since 19:02."** New, Changed, Resolved, No change. A diff for a building. The confidence line, 0.71 to 0.82, ties to the AI hypothesis shown next.
-4. **Click "Open on graph" on item 01.** The brief closes, the graph pans and zooms onto UPS-A1 with a short pulse, the affected path traces in amber, and the asset panel opens on the **Evidence** tab with Sarah's decision shown above the AI hypothesis. Nodes that carry a handoff decision show a small clipboard marker.
-5. **Stop and look at the canvas before touching anything.** Two assets are outlined in red, pulsing slowly, each with a "Needs your review" badge on the card, and the toolbar reads "2 need your review". Say what the colors mean: amber is a condition the equipment has, red is a decision a human owes. Rack R-42 is the proof. It sits at 92% of its power budget so it stays amber, because nobody owes a decision on it. The canvas shows where your judgment is outstanding, not just where the plant is unhappy.
+4. **Click "Open on graph" on item 01.** The brief closes, the graph pans and zooms onto UPS-A1 and its neighbors with a short pulse, the affected path traces in amber, and the asset panel opens on the **Evidence** tab with Sarah's decision shown above the AI hypothesis. Nodes that carry a handoff decision show a small clipboard marker.
+5. **Stop and look at the canvas before touching anything.** Two assets are outlined in red, pulsing slowly, each with a "Needs your decision" label on the card, and the toolbar reads "2 need your decision". Say what the colors mean: amber is a condition the equipment has, red is a decision a human owes. Rack R-42 is the proof. It sits at 92% of its power budget so it stays amber, because nobody owes a decision on it. The canvas shows where your judgment is outstanding, not just where the plant is unhappy.
 6. **Open the Ask tab.** Neuron has already answered the questions for this asset, so there is no prompt to compose. Each answer cites assets by name.
-7. **Open the Impact tab on UPS-A1.** Nothing loses power and three assets are held by redundancy. Now select PDU-05 and look again: two racks lose power and nothing covers them. The graph draws the de-energized path in dashed red. That contrast is the point.
+7. **Open the Impact tab on UPS-A1.** Opening the tab draws the failure preview on the graph. Nothing loses power and three assets are held by redundancy. Now select PDU-05 and look again: two racks lose power and nothing covers them. The graph goes dark where power would be lost: the flow stops, the lines turn to gray dashes, and the racks' readings are struck through. That contrast is the point.
 8. **Open the recommendation on UPS-A1 and choose Approve.** Four pre-flight steps must be acknowledged and the asset name typed before the button unlocks. Compare with Switchgear SWGR-A, where a reversible threshold change is a single click. Record the decision and three things happen at once: the red clears to a quiet green "Decided by you" and the toolbar count drops, the decision pins to the canvas beside its asset, and it appears in the shift brief under "Decisions you are handing on." Drag the pinned card anywhere; it stays with its asset and survives a reload. The broom control under the zoom buttons clears pins and decisions between runs.
 9. **Drag a node, then reset.** The circular-arrow **Reset layout** control under the zoom buttons restores the layout. The graph is a live layout, not a picture.
 10. **Turn on the Learning layer** in the toolbar. A violet section appends below the operator panel with definitions, a glossary for the acronyms on screen, and an optional self-test. The line to say: I am not the user, so my scaffolding switches off.
 11. **Click "Shift brief" in the top bar.** The handoff is available for the whole shift, not only at the start.
-12. Click the ⓘ next to "Operator learning mode" to show how simulated values and assumptions are labeled.
+12. Click the ⓘ next to "Investigation" to show how simulated values and assumptions are labeled.
 
 Decide both recommendations and every red outline on the canvas is gone by the end of the walkthrough. That before and after is legible from across a room.
 
@@ -75,6 +81,9 @@ Built:
 - Simulated AI hypothesis with visible confidence
 - Mock live telemetry with a simulated refresh timer
 - Keyboard selection of graph nodes, tab arrow-key navigation, and announced quiz feedback
+- A seven-step guided tour for visitors exploring alone, replayable from the top bar
+- Power that visibly flows along the path, a power-up when the shift starts, and motion that marks state changes, all of it stopped under reduced motion
+- A designed phone page for screens too narrow for the console
 
 Not built:
 
@@ -88,7 +97,7 @@ Not built:
 
 ## Case study
 
-A written brief covering the premise, the design and technical decisions, and where this would go next is served with the app at [/case-study](https://neuron-shift.vercel.app/case-study). The source is `public/case-study.html`, a standalone static page rather than a route inside the React app, so it adds nothing to the bundle.
+A written brief covering the premise, the design and technical decisions, and where this would go next is served with the app at [/case-study](https://neuron-shift.vercel.app/case-study). The source is `public/case-study.html`, a standalone static page rather than a route inside the React app, so it adds nothing to the bundle. It uses the same palette as the app. Its screenshots live in `public/case-study-media/`, captured from the running app at 1440 × 900 and 2× pixel density. Recapture them when the interface changes. In local dev, open it at `/case-study.html`; the `/case-study` path is mapped only on Vercel.
 
 ## Stack
 
@@ -97,12 +106,16 @@ A written brief covering the premise, the design and technical decisions, and wh
 - TypeScript
 - React Flow
 - Phosphor Icons
-- CSS design tokens set from `src/theme.ts`
+- Motion for dialog, disclosure, and tab transitions
+- IBM Plex Sans and IBM Plex Mono, self-hosted through Fontsource
+- CSS design tokens set from `src/theme.ts`. See `DESIGN.md` for the visual system and `PRODUCT.md` for the design principles.
 
 ## Code map
 
 - `src/App.tsx` owns state and renders the graph.
-- `src/components/` holds the shift brief, left panel, asset panel, learning layer, node card, and reset control.
+- `src/components/` holds the shift brief, left panel, asset panel, learning layer, node card and power edge, tour card, phone page, and canvas controls.
+- `src/data/tour.ts` holds the guided tour steps and the state that completes each one.
+- `src/motion.ts` holds the shared motion presets.
 - `src/data/scenario.ts` holds the nodes, connections, guided steps, quiz, telemetry baseline, and the shift handoff under `shiftHandoff`. Every name, time, and threshold there is fictional.
 - `src/data/decisions.ts` holds the recommendations, the autonomy ladder, and the decision model.
 - `src/layoutStorage.ts` persists dragged node positions.

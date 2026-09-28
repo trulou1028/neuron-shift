@@ -9,7 +9,7 @@ export function ResetLayoutControl({ onReset }: { onReset: () => void }) {
       onClick={() => {
         onReset();
         // Positions are restored by a state update, so measure on the next frame.
-        window.requestAnimationFrame(() => void fitView({ padding: 0.06, duration: 320 }));
+        window.requestAnimationFrame(() => void fitView({ padding: 0.08, duration: 320 }));
       }}
       title="Reset layout"
       aria-label="Reset layout"

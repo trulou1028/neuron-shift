@@ -3,8 +3,10 @@ import { DEFAULT_SELECTED_ID, powerNodes, type PowerNode } from "./data/scenario
 import type { OperatorDecision } from "./data/decisions";
 import type { PinnedWidget } from "./data/widgets";
 
-const LAYOUT_STORAGE_KEY = "neuron-field-notes:node-layout:v2";
-const WIDGET_STORAGE_KEY = "neuron-shift:widgets:v1";
+// v3: the path runs top to bottom.
+const LAYOUT_STORAGE_KEY = "neuron-field-notes:node-layout:v3";
+// v3: cards sit beside their asset, and `align` says which side.
+const WIDGET_STORAGE_KEY = "neuron-shift:widgets:v3";
 const DECISION_STORAGE_KEY = "neuron-shift:decisions:v1";
 
 export const initialPositions: Record<string, XYPosition> = Object.fromEntries(
@@ -83,6 +85,7 @@ export function readStoredWidgets(): PinnedWidget[] {
       typeof widget.id === "string" &&
       knownNode(widget.node) &&
       (widget.kind === "decision" || widget.kind === "impact" || widget.kind === "handoff") &&
+      (widget.align === "start" || widget.align === "end") &&
       !!widget.offset &&
       Number.isFinite(widget.offset.x) &&
       Number.isFinite(widget.offset.y)
@@ -107,5 +110,25 @@ export function clearPinsAndDecisions() {
     window.localStorage.removeItem(DECISION_STORAGE_KEY);
   } catch {
     // Ignored for the same reason as above.
+  }
+}
+
+/* The guided tour starts on a visitor's first load and stays out of the way after that. */
+
+const TOUR_STORAGE_KEY = "neuron-shift:tour:v1";
+
+export function readTourSeen(): boolean {
+  try {
+    return window.localStorage.getItem(TOUR_STORAGE_KEY) === "seen";
+  } catch {
+    return false;
+  }
+}
+
+export function markTourSeen() {
+  try {
+    window.localStorage.setItem(TOUR_STORAGE_KEY, "seen");
+  } catch {
+    // Without storage the tour offers itself again next visit, which is harmless.
   }
 }

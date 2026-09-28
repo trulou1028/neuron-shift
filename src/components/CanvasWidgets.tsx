@@ -5,7 +5,7 @@ import { handoffByNode, impactByNode, titleOf, type PowerNode } from "../data/sc
 import { decisionLabel, type OperatorDecision } from "../data/decisions";
 import type { PinnedWidget } from "../data/widgets";
 
-const CARD_WIDTH = 232;
+const CARD_WIDTH = 216;
 /** Below this zoom a full card swamps the graph, so widgets collapse to a pill. */
 const COLLAPSE_BELOW = 0.72;
 /** Pointer travel that separates a click from a drag. */
@@ -122,7 +122,7 @@ function WidgetCard({
       className={`canvas-widget nopan canvas-widget--${widget.kind} ${collapsed ? "is-collapsed" : ""} ${dragging ? "is-dragging" : ""}`}
       style={{
         position: "absolute",
-        transform: `translate(${anchor.position.x + widget.offset.x}px, ${anchor.position.y + widget.offset.y}px) scale(${1 / zoom})`,
+        transform: `translate(${anchor.position.x + widget.offset.x}px, ${anchor.position.y + widget.offset.y}px) scale(${1 / zoom})${widget.align === "end" ? " translateX(-100%)" : ""}`,
         transformOrigin: "top left",
         width: collapsed ? "auto" : CARD_WIDTH,
       }}

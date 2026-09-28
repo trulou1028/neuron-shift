@@ -1,5 +1,7 @@
-import { Check, GraduationCap, Info, Lightning, ShieldCheck, Warning } from "@phosphor-icons/react";
+import { AnimatePresence, motion } from "motion/react";
+import { Check, Info, Lightning, ShieldCheck, Warning } from "@phosphor-icons/react";
 import { learningSteps, telemetryBaseline } from "../data/scenario";
+import { disclosureMotion } from "../motion";
 
 type MissionPanelProps = {
   activeStep: number;
@@ -11,85 +13,82 @@ type MissionPanelProps = {
 };
 
 export function MissionPanel({ activeStep, traceActive, honestyOpen, onToggleHonesty, onToggleTrace, onGoToStep }: MissionPanelProps) {
-  const currentStep = learningSteps[activeStep];
-
   return (
-    <aside className="mission-panel">
+    <aside className="mission-panel" aria-label="Investigation">
       <div className="panel-kicker-row">
-        <div className="panel-kicker"><GraduationCap size={16} weight="fill" /> Operator learning mode</div>
+        <span className="panel-kicker">Investigation</span>
         <button
-          className={`info-button ${honestyOpen ? "is-open" : ""}`}
+          className={`icon-button icon-button--small ${honestyOpen ? "is-open" : ""}`}
           aria-expanded={honestyOpen}
           aria-controls="honesty-note"
           aria-label="About the data in this prototype"
           title="How the data in this prototype is labeled"
           onClick={onToggleHonesty}
         >
-          <Info size={16} />
+          <Info size={15} />
         </button>
       </div>
-      {honestyOpen && (
-        <div className="assumption-note" id="honesty-note">
-          <ShieldCheck size={16} />
-          <span>
-            <strong>Learning honestly</strong>
-            An independent concept prototype, not affiliated with or endorsed by Teserac. Every value is
-            simulated, and industry assumptions are labeled so an expert can correct them.
-          </span>
-        </div>
-      )}
-      <h1>Follow the power.<br />Understand the risk.</h1>
+      <AnimatePresence initial={false}>
+        {honestyOpen && (
+          <motion.div className="disclosure" {...disclosureMotion}>
+            <div className="assumption-note" id="honesty-note">
+              <ShieldCheck size={15} />
+              <span>
+                <strong>Learning honestly</strong>
+                An independent concept prototype, not affiliated with or endorsed by Teserac. Every value is
+                simulated, and industry assumptions are labeled so an expert can correct them.
+              </span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <h1>Follow the power. Understand the risk.</h1>
 
-      <div className="incident-card">
-        <div className="incident-card__title"><Warning size={15} weight="fill" /> Active scenario</div>
+      <section className="incident-card" aria-label="Active scenario">
+        <div className="incident-card__title"><Warning size={13} weight="fill" /> Active scenario</div>
         <strong>UPS-A1 battery impedance rising</strong>
-        <p>Estimated runtime fell from {telemetryBaseline.previousRuntimeMin} to {telemetryBaseline.upsRuntimeMin} minutes.</p>
-        <span>Major · Power · open 16.7 h</span>
-      </div>
+        <p>
+          Estimated runtime fell from <span className="mono">{telemetryBaseline.previousRuntimeMin}</span> to{" "}
+          <span className="mono">{telemetryBaseline.upsRuntimeMin}</span> minutes.
+        </p>
+        <dl className="incident-card__facts">
+          <div><dt>Severity</dt><dd>Major</dd></div>
+          <div><dt>System</dt><dd>Power</dd></div>
+          <div><dt>Open</dt><dd className="mono">16.7 h</dd></div>
+        </dl>
+      </section>
 
-      <button className="trace-button" aria-pressed={traceActive} onClick={onToggleTrace}>
-        <Lightning size={17} weight="fill" />
+      <button className={`button button--trace ${traceActive ? "is-on" : ""}`} aria-pressed={traceActive} onClick={onToggleTrace}>
+        <Lightning size={15} weight="fill" />
         {traceActive ? "Hide affected power path" : "Trace affected power path"}
       </button>
 
-      <div className="step-progress">
-        <div className="step-progress__meta">
+      <section className="steps" aria-label="Guided investigation">
+        <div className="steps__meta">
           <span>Guided investigation</span>
-          <span>Step {activeStep + 1} of {learningSteps.length}</span>
+          <span className="mono">{activeStep + 1}/{learningSteps.length}</span>
         </div>
-        <div
-          className="step-progress__track"
-          style={{ gridTemplateColumns: `repeat(${learningSteps.length}, 1fr)` }}
-          aria-hidden="true"
-        >
-          {learningSteps.map((step, index) => (
-            <span key={step.title} className={index <= activeStep ? "is-filled" : ""} />
-          ))}
-        </div>
-      </div>
-
-      <div className="current-step">
-        <span className="current-step__index">{activeStep + 1}</span>
-        <div>
-          <strong>{currentStep.title}</strong>
-          <p>{currentStep.detail}</p>
-        </div>
-      </div>
-
-      <ol className="step-list">
-        {learningSteps.map((step, index) => (
-          <li key={step.title}>
-            <button
-              className={`step-item ${index === activeStep ? "is-active" : ""} ${index < activeStep ? "is-complete" : ""}`}
-              aria-current={index === activeStep ? "step" : undefined}
-              onClick={() => onGoToStep(index)}
-            >
-              <span className="step-item__index">{index < activeStep ? <Check size={11} weight="bold" /> : index + 1}</span>
-              <span>{step.title}</span>
-            </button>
-          </li>
-        ))}
-      </ol>
+        <ol className="step-list">
+          {learningSteps.map((step, index) => {
+            const active = index === activeStep;
+            return (
+              <li key={step.title} className={`step-item ${active ? "is-active" : ""} ${index < activeStep ? "is-complete" : ""}`}>
+                <button aria-current={active ? "step" : undefined} onClick={() => onGoToStep(index)}>
+                  <span className="step-item__index mono">{index < activeStep ? <Check size={10} weight="bold" /> : index + 1}</span>
+                  <span className="step-item__title">{step.title}</span>
+                </button>
+                <AnimatePresence initial={false}>
+                  {active && (
+                    <motion.div className="disclosure" {...disclosureMotion}>
+                      <p className="step-item__detail">{step.detail}</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </li>
+            );
+          })}
+        </ol>
+      </section>
     </aside>
   );
 }
