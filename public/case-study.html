@@ -3,79 +3,37 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0f0e0c">
 <meta name="description" content="How and why Neuron Shift was designed and built: a shift-handoff and human-in-the-loop prototype for 24/7 data center operations.">
 <meta property="og:title" content="Building Neuron Shift">
 <meta property="og:description" content="How and why Neuron Shift was designed and built: a shift-handoff and human-in-the-loop prototype for 24/7 data center operations.">
 <meta property="og:type" content="article">
+<meta property="og:image" content="/case-study-media/console.webp">
 <title>Building Neuron Shift</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&display=swap">
 
 <style>
+  /* Same palette as the prototype (src/theme.ts): warm graphite chrome with no hue,
+     and hue reserved for state. One meaning per color, here as in the app. */
   :root {
-    --ground: #EAEDF0;
-    --surface: #FFFFFF;
-    --surface-2: #F3F6F8;
-    --ink: #15191E;
-    --ink-2: #414B57;
-    --ink-3: #6B7783;
-    --rule: #D2D8DE;
-    --rule-strong: #B6BFC8;
-    --accent: #14556F;
-    --accent-2: #1E7799;
-    --accent-soft: #E1EDF2;
-    --good: #17734A;
-    --good-soft: #E0F0E7;
-    --warn: #8E5A06;
-    --warn-soft: #F6EBD8;
-    --crit: #AF2430;
-    --crit-soft: #F8E3E4;
-    --shadow: 0 1px 2px rgba(21,25,30,.06), 0 8px 24px rgba(21,25,30,.06);
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --ground: #0F1317;
-      --surface: #161B21;
-      --surface-2: #1C232A;
-      --ink: #E9EEF3;
-      --ink-2: #AFBAC5;
-      --ink-3: #7D8A97;
-      --rule: #29323B;
-      --rule-strong: #3A4650;
-      --accent: #74C8E4;
-      --accent-2: #9BDCF0;
-      --accent-soft: #11303C;
-      --good: #57CE90;
-      --good-soft: #10291D;
-      --warn: #E2AA43;
-      --warn-soft: #2B2011;
-      --crit: #F5757F;
-      --crit-soft: #2C1417;
-      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
-    }
-  }
-
-  :root[data-theme="dark"] {
-    --ground: #0F1317;
-    --surface: #161B21;
-    --surface-2: #1C232A;
-    --ink: #E9EEF3;
-    --ink-2: #AFBAC5;
-    --ink-3: #7D8A97;
-    --rule: #29323B;
-    --rule-strong: #3A4650;
-    --accent: #74C8E4;
-    --accent-2: #9BDCF0;
-    --accent-soft: #11303C;
-    --good: #57CE90;
-    --good-soft: #10291D;
-    --warn: #E2AA43;
-    --warn-soft: #2B2011;
-    --crit: #F5757F;
-    --crit-soft: #2C1417;
-    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    --ground: oklch(0.145 0.004 75);
+    --surface: oklch(0.172 0.005 75);
+    --surface-2: oklch(0.2 0.006 75);
+    --ink: oklch(0.95 0.006 85);
+    --ink-2: oklch(0.82 0.008 85);
+    --ink-3: oklch(0.68 0.01 85);
+    --rule: oklch(0.275 0.007 75);
+    --rule-strong: oklch(0.36 0.008 75);
+    --flow: oklch(0.8 0.13 155);
+    --condition: oklch(0.83 0.15 78);
+    --owed: oklch(0.68 0.2 25);
+    --flow-soft: color-mix(in oklab, var(--flow) 12%, var(--surface));
+    --condition-soft: color-mix(in oklab, var(--condition) 11%, var(--surface));
+    --owed-soft: color-mix(in oklab, var(--owed) 13%, var(--surface));
+    --shadow: 0 1px 0 oklch(1 0 0 / .04) inset, 0 12px 32px oklch(0 0 0 / .38);
+    color-scheme: dark;
   }
 
   * { box-sizing: border-box; }
@@ -92,25 +50,17 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  .wrap {
-    max-width: 1140px;
-    margin: 0 auto;
-    padding: 0 28px 96px;
-  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 28px 96px; }
 
   /* ---------- Masthead ---------- */
-  .masthead {
-    border-bottom: 2px solid var(--ink);
-    padding: 56px 0 22px;
-    margin-bottom: 40px;
-  }
+  .masthead { padding: 56px 0 28px; }
   .kicker {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
     font-size: 11.5px;
     font-weight: 500;
     letter-spacing: .14em;
     text-transform: uppercase;
-    color: var(--accent);
+    color: var(--ink-3);
     margin-bottom: 18px;
   }
   h1 {
@@ -122,39 +72,28 @@
     margin: 0 0 18px;
     text-wrap: balance;
   }
-  .standfirst {
-    font-size: clamp(17px, 2vw, 20px);
-    line-height: 1.5;
-    color: var(--ink-2);
-    max-width: 60ch;
-    margin: 0 0 30px;
-  }
+  .standfirst { font-size: clamp(17px, 2vw, 20px); line-height: 1.5; color: var(--ink-2); max-width: 60ch; margin: 0 0 30px; }
   .standfirst em { color: var(--ink); font-style: italic; }
 
-  .masthead-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px 12px;
-    align-items: center;
-  }
+  .masthead-meta { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: center; }
   .btn {
     font-family: "IBM Plex Sans", system-ui, sans-serif;
     font-size: 14px;
     font-weight: 600;
     text-decoration: none;
     padding: 10px 16px;
-    border-radius: 3px;
+    border-radius: 6px;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    border: 1px solid var(--accent);
-    transition: background .15s, color .15s;
+    border: 1px solid var(--rule-strong);
+    transition: background .15s, color .15s, border-color .15s;
   }
-  .btn-primary { background: var(--accent); color: var(--ground); }
-  .btn-primary:hover { background: var(--accent-2); border-color: var(--accent-2); }
-  .btn-ghost { color: var(--accent); background: transparent; }
-  .btn-ghost:hover { background: var(--accent-soft); }
-  .btn:focus-visible, a:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+  .btn-primary { background: var(--ink); border-color: var(--ink); color: var(--ground); }
+  .btn-primary:hover { background: oklch(1 0 0); }
+  .btn-ghost { color: var(--ink); background: var(--surface-2); }
+  .btn-ghost:hover { background: var(--rule); }
+  .btn:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
   .stamp {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
@@ -163,18 +102,45 @@
     color: var(--ink-3);
     border: 1px dashed var(--rule-strong);
     padding: 8px 12px;
-    border-radius: 3px;
+    border-radius: 6px;
   }
+
+  /* ---------- Screenshots ---------- */
+  figure { margin: 28px 0; }
+  .shot { display: block; border: 1px solid var(--rule-strong); border-radius: 10px; overflow: hidden; background: var(--surface); box-shadow: var(--shadow); }
+  .shot img { display: block; width: 100%; height: auto; }
+  a.shot { transition: border-color .15s; }
+  a.shot:hover { border-color: var(--ink-3); }
+  figcaption {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11.5px;
+    letter-spacing: .03em;
+    color: var(--ink-3);
+    margin-top: 12px;
+    line-height: 1.55;
+    max-width: 72ch;
+  }
+  .hero { margin: 8px 0 44px; padding-bottom: 36px; border-bottom: 1px solid var(--rule-strong); }
+  .pair { display: grid; gap: 14px; grid-template-columns: 1fr; }
+  @media (min-width: 720px) { .pair { grid-template-columns: 1fr 1fr; } }
+  .pair figure { margin: 0; }
+  .pair-wrap { margin: 28px 0; }
+  .pair-label { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: .06em; color: var(--ink-2); margin: 0 0 8px; }
+
+  /* Text beside a tall screenshot. */
+  .split { display: grid; gap: 28px; grid-template-columns: 1fr; align-items: start; margin: 28px 0; }
+  .split figure { margin: 0; max-width: var(--shot-w, 340px); }
+  @media (min-width: 860px) {
+    .split { grid-template-columns: minmax(0, 1fr) var(--shot-w, 340px); }
+    .split--flip { grid-template-columns: var(--shot-w, 340px) minmax(0, 1fr); }
+    .split--flip figure { order: -1; }
+  }
+  .split > div > :first-child { margin-top: 0; }
 
   /* ---------- Layout ---------- */
   .columns { display: block; }
   @media (min-width: 1080px) {
-    .columns {
-      display: grid;
-      grid-template-columns: 176px minmax(0, 1fr);
-      gap: 56px;
-      align-items: start;
-    }
+    .columns { display: grid; grid-template-columns: 168px minmax(0, 1fr); gap: 56px; align-items: start; }
   }
 
   nav.rail { display: none; }
@@ -189,47 +155,18 @@
       border-left: 1px solid var(--rule);
       padding-left: 14px;
     }
-    nav.rail a {
-      display: block;
-      position: relative;
-      color: var(--ink-3);
-      text-decoration: none;
-      padding: 5px 0;
-      letter-spacing: .02em;
-      transition: color .16s ease;
-    }
-    nav.rail a::before {
-      content: "";
-      position: absolute;
-      left: -15px;
-      top: 50%;
-      width: 2px;
-      height: 0;
-      background: var(--accent);
-      transform: translateY(-50%);
-      transition: height .18s ease;
-    }
-    nav.rail a:hover { color: var(--accent); }
+    nav.rail a { display: block; position: relative; color: var(--ink-3); text-decoration: none; padding: 5px 0; letter-spacing: .02em; transition: color .16s ease; }
+    nav.rail a::before { content: ""; position: absolute; left: -15px; top: 50%; width: 2px; height: 0; background: var(--ink); transform: translateY(-50%); transition: height .18s ease; }
+    nav.rail a:hover { color: var(--ink); }
     nav.rail a.is-current { color: var(--ink); font-weight: 600; }
     nav.rail a.is-current::before { height: 17px; }
-    @media (prefers-reduced-motion: reduce) {
-      nav.rail a, nav.rail a::before { transition: none; }
-    }
-    nav.rail .rail-title {
-      color: var(--ink);
-      font-weight: 600;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      font-size: 10.5px;
-      padding-bottom: 8px;
-      margin-bottom: 4px;
-      border-bottom: 1px solid var(--rule);
-    }
+    @media (prefers-reduced-motion: reduce) { nav.rail a, nav.rail a::before { transition: none; } }
+    nav.rail .rail-title { color: var(--ink); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; font-size: 10.5px; padding-bottom: 8px; margin-bottom: 4px; border-bottom: 1px solid var(--rule); }
   }
 
-  main { max-width: 72ch; }
-
-  section { margin-bottom: 60px; scroll-margin-top: 24px; }
+  main { min-width: 0; }
+  section { margin-bottom: 64px; scroll-margin-top: 24px; }
+  main > section > p, main > section > ul, .section-head p { max-width: 68ch; }
 
   h2 {
     font-family: "IBM Plex Sans", system-ui, sans-serif;
@@ -246,7 +183,7 @@
     font-weight: 500;
     letter-spacing: .14em;
     text-transform: uppercase;
-    color: var(--accent);
+    color: var(--ink-3);
     display: block;
     margin-bottom: 10px;
   }
@@ -254,56 +191,23 @@
   .section-head p { color: var(--ink-2); margin: 10px 0 0; }
 
   p { margin: 0 0 17px; }
-  main > section > p { max-width: 68ch; }
-
   strong { font-weight: 600; }
   em { font-style: italic; }
 
-  code, .mono {
+  .mono {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
     font-size: .88em;
     background: var(--surface-2);
     border: 1px solid var(--rule);
-    border-radius: 3px;
+    border-radius: 4px;
     padding: 1px 5px;
   }
 
-  /* ---------- Thesis pull ---------- */
-  .thesis {
-    background: var(--surface);
-    border: 1px solid var(--rule);
-    border-left: 3px solid var(--accent);
-    border-radius: 3px;
-    padding: 24px 26px;
-    margin: 26px 0;
-    box-shadow: var(--shadow);
-  }
-  .thesis p {
-    font-size: clamp(18px, 2.2vw, 21px);
-    line-height: 1.42;
-    font-style: italic;
-    color: var(--ink);
-    margin: 0;
-    text-wrap: balance;
-  }
-  .thesis .attrib {
-    font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-style: normal;
-    font-size: 11.5px;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    color: var(--ink-3);
-    margin-top: 14px;
-  }
+  .thesis { background: var(--surface); border: 1px solid var(--rule-strong); border-radius: 8px; padding: 24px 26px; margin: 26px 0; max-width: 68ch; }
+  .thesis p { font-size: clamp(18px, 2.2vw, 21px); line-height: 1.42; font-style: italic; color: var(--ink); margin: 0; text-wrap: balance; }
+  .thesis .attrib { font-family: "IBM Plex Mono", ui-monospace, monospace; font-style: normal; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); margin-top: 14px; }
 
-  h3.sub {
-    font-family: "IBM Plex Sans", system-ui, sans-serif;
-    font-size: 17.5px;
-    font-weight: 600;
-    letter-spacing: -.01em;
-    margin: 30px 0 10px;
-    text-wrap: balance;
-  }
+  h3.sub { font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 17.5px; font-weight: 600; letter-spacing: -.01em; margin: 30px 0 10px; text-wrap: balance; }
 
   .verdict {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
@@ -312,177 +216,62 @@
     letter-spacing: .07em;
     text-transform: uppercase;
     padding: 2px 7px;
-    border-radius: 3px;
+    border-radius: 4px;
     margin-right: 8px;
     white-space: nowrap;
   }
-  .verdict-yes { color: var(--good); background: var(--good-soft); }
-  .verdict-part { color: var(--warn); background: var(--warn-soft); }
-  .verdict-no { color: var(--crit); background: var(--crit-soft); }
+  .verdict-yes { color: var(--flow); background: var(--flow-soft); }
+  .verdict-part { color: var(--condition); background: var(--condition-soft); }
+  .verdict-no { color: var(--owed); background: var(--owed-soft); }
 
   /* ---------- Decision entries ---------- */
-  .entry {
-    background: var(--surface);
-    border: 1px solid var(--rule);
-    border-radius: 3px;
-    padding: 22px 24px;
-    margin-bottom: 14px;
-    box-shadow: var(--shadow);
-  }
-  .entry h3 {
-    font-family: "IBM Plex Sans", system-ui, sans-serif;
-    font-size: 18.5px;
-    font-weight: 600;
-    letter-spacing: -.012em;
-    line-height: 1.3;
-    margin: 0 0 12px;
-    text-wrap: balance;
-  }
-  .entry p:last-child { margin-bottom: 0; }
-  .entry p { font-size: 15.5px; line-height: 1.6; color: var(--ink-2); }
+  .entries { display: grid; gap: 12px; max-width: 76ch; }
+  .entry { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 20px 22px; }
+  .entry h3 { font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 17.5px; font-weight: 600; letter-spacing: -.012em; line-height: 1.3; margin: 0 0 8px; text-wrap: balance; }
+  .entry p { font-size: 15.5px; line-height: 1.6; color: var(--ink-2); margin-bottom: 0; }
   .entry p strong { color: var(--ink); }
-
-  .field {
-    display: grid;
-    grid-template-columns: 92px minmax(0, 1fr);
-    gap: 4px 16px;
-    margin-top: 14px;
-    padding-top: 14px;
-    border-top: 1px solid var(--rule);
-    font-size: 15px;
-  }
-  .field dt {
-    font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 10.5px;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--ink-3);
-    padding-top: 5px;
-  }
-  .field dd { margin: 0 0 8px; color: var(--ink-2); line-height: 1.55; }
-  .field dd:last-of-type { margin-bottom: 0; }
+  .why { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); margin-right: 6px; }
 
   /* ---------- Color semantics ---------- */
-  .swatches { display: grid; gap: 10px; margin: 22px 0; }
-  .swatch {
-    display: grid;
-    grid-template-columns: 14px minmax(0, 1fr);
-    gap: 16px;
-    align-items: start;
-    background: var(--surface);
-    border: 1px solid var(--rule);
-    border-radius: 3px;
-    padding: 16px 18px;
-  }
-  .chip { width: 14px; height: 14px; border-radius: 50%; margin-top: 5px; }
-  .chip-good { background: var(--good); }
-  .chip-warn { background: var(--warn); }
-  .chip-crit { background: var(--crit); box-shadow: 0 0 0 4px var(--crit-soft); }
-  .swatch h4 {
-    font-family: "IBM Plex Sans", system-ui, sans-serif;
-    font-size: 15.5px;
-    font-weight: 600;
-    margin: 0 0 4px;
-  }
-  .swatch p { font-size: 14.5px; margin: 0; color: var(--ink-2); line-height: 1.5; }
+  .swatches { display: grid; gap: 8px; margin: 22px 0; max-width: 76ch; }
+  @media (min-width: 720px) { .swatches { grid-template-columns: 1fr 1fr; } }
+  .swatch { display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 14px; align-items: start; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 14px 16px; }
+  .chip { width: 12px; height: 12px; border-radius: 3px; margin-top: 5px; }
+  .chip-good { background: var(--flow); }
+  .chip-warn { background: var(--condition); }
+  .chip-crit { background: var(--owed); box-shadow: 0 0 0 4px var(--owed-soft); }
+  .chip-off { background: transparent; border: 1.5px dashed var(--ink-3); }
+  .swatch h4 { font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 15px; font-weight: 600; margin: 0 0 2px; }
+  .swatch p { font-size: 14px; margin: 0; color: var(--ink-2); line-height: 1.5; }
 
   /* ---------- Inventory ---------- */
-  .inventory { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; margin: 22px 0; }
-  .inv-row { background: var(--surface); padding: 16px 18px; display: grid; grid-template-columns: minmax(0,1fr); gap: 4px; }
-  @media (min-width: 640px) { .inv-row { grid-template-columns: 190px minmax(0,1fr); gap: 20px; align-items: baseline; } }
-  .inv-row dt {
-    font-family: "IBM Plex Sans", system-ui, sans-serif;
-    font-weight: 600;
-    font-size: 15px;
-  }
-  .inv-row dd { margin: 0; font-size: 14.8px; color: var(--ink-2); line-height: 1.52; }
-
-  /* ---------- Diagram ---------- */
-  figure { margin: 26px 0; }
-  .diagram {
-    background: var(--surface);
-    border: 1px solid var(--rule);
-    border-radius: 3px;
-    padding: 26px 20px 20px;
-    overflow-x: auto;
-    box-shadow: var(--shadow);
-  }
-  .diagram svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
-  figcaption {
-    font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 11.5px;
-    letter-spacing: .03em;
-    color: var(--ink-3);
-    margin-top: 12px;
-    line-height: 1.5;
-  }
-  .d-box { fill: var(--surface-2); stroke: var(--rule-strong); }
-  .d-label { fill: var(--ink); font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 13px; font-weight: 600; }
-  .d-sub { fill: var(--ink-3); font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 10px; letter-spacing: .06em; }
-  .d-line { stroke: var(--accent); fill: none; stroke-width: 1.5; }
-  .d-arrow { fill: var(--accent); }
+  .inventory { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; margin: 22px 0; max-width: 76ch; }
+  .inv-row { background: var(--surface); padding: 13px 16px; display: grid; grid-template-columns: minmax(0,1fr); gap: 3px; }
+  @media (min-width: 640px) { .inv-row { grid-template-columns: 150px minmax(0,1fr); gap: 18px; align-items: baseline; } }
+  .split .inv-row { grid-template-columns: minmax(0,1fr); gap: 3px; }
+  .inv-row dt { font-family: "IBM Plex Sans", system-ui, sans-serif; font-weight: 600; font-size: 14.5px; }
+  .inv-row dd { margin: 0; font-size: 14.5px; color: var(--ink-2); line-height: 1.5; }
 
   /* ---------- Lists ---------- */
-  ul.clean { list-style: none; padding: 0; margin: 18px 0; display: grid; gap: 11px; }
-  ul.clean li {
-    padding-left: 22px;
-    position: relative;
-    color: var(--ink-2);
-    font-size: 15.5px;
-    line-height: 1.55;
-  }
-  ul.clean li::before {
-    content: "";
-    position: absolute;
-    left: 2px;
-    top: .62em;
-    width: 7px;
-    height: 1.5px;
-    background: var(--accent);
-  }
+  ul.clean { list-style: none; padding: 0; margin: 18px 0; display: grid; gap: 10px; }
+  ul.clean li { padding-left: 22px; position: relative; color: var(--ink-2); font-size: 15.5px; line-height: 1.55; }
+  ul.clean li::before { content: ""; position: absolute; left: 2px; top: .62em; width: 7px; height: 1.5px; background: var(--ink-3); }
   ul.clean li strong { color: var(--ink); }
 
-  /* ---------- Limits ---------- */
-  .limits {
-    background: var(--surface-2);
-    border: 1px solid var(--rule);
-    border-radius: 3px;
-    padding: 22px 24px;
-  }
-  .limits ul.clean li::before { background: var(--ink-3); }
+  .limits { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 20px 22px; max-width: 76ch; }
+  .limits ul.clean { margin-bottom: 0; }
+  .limits p { font-size: 15.5px; line-height: 1.6; color: var(--ink-2); }
 
-  /* ---------- Stack ---------- */
   .stack-grid { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0; }
-  .tag {
-    font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 12px;
-    letter-spacing: .03em;
-    background: var(--surface);
-    border: 1px solid var(--rule);
-    border-radius: 3px;
-    padding: 6px 11px;
-    color: var(--ink-2);
-  }
+  .tag { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; letter-spacing: .03em; background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 6px 11px; color: var(--ink-2); }
 
-  a.inline { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 1px; }
-  a.inline:hover { color: var(--accent-2); }
+  a.inline { color: var(--ink); text-decoration: underline; text-decoration-color: var(--ink-3); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  a.inline:hover { text-decoration-color: var(--ink); }
 
-  footer {
-    border-top: 2px solid var(--ink);
-    margin-top: 20px;
-    padding-top: 22px;
-    font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 11.5px;
-    letter-spacing: .04em;
-    color: var(--ink-3);
-    line-height: 1.7;
-  }
+  footer { border-top: 1px solid var(--rule-strong); margin-top: 20px; padding-top: 22px; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11.5px; letter-spacing: .04em; color: var(--ink-3); line-height: 1.7; }
 
-  @media (prefers-reduced-motion: reduce) {
-    * { animation: none !important; transition: none !important; }
-  }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
-
 </head>
 <body>
 <div class="wrap">
@@ -496,11 +285,18 @@
       the operator who is accountable for what it recommends.
     </p>
     <div class="masthead-meta">
-      <a class="btn btn-primary" href="/">Open the live prototype</a>
+      <a class="btn btn-primary" href="/">Open the prototype · 2 min tour</a>
       <a class="btn btn-ghost" href="https://github.com/trulou1028/neuron-shift">Source on GitHub</a>
       <span class="stamp">All data simulated · Labeled as such in the interface</span>
     </div>
   </header>
+
+  <figure class="hero">
+    <a class="shot" href="/case-study-media/console.webp">
+      <img src="/case-study-media/console.webp" width="2880" height="1800" alt="The Neuron Shift console. An investigation rail on the left, the power path in the middle running from the utility feed down to two racks, and the selected asset on the right. The affected path is traced in amber, and two assets are outlined in red because a decision is owed on them.">
+    </a>
+    <figcaption>The console after taking the shift. Amber traces the investigated path. Red marks where a person owes a decision.</figcaption>
+  </figure>
 
   <div class="columns">
 
@@ -511,6 +307,7 @@
       <a href="#built">What is built</a>
       <a href="#chat">Position on chat</a>
       <a href="#decisions">Design decisions</a>
+      <a href="#visitor">The unguided visitor</a>
       <a href="#color">Color semantics</a>
       <a href="#technical">Technical decisions</a>
       <a href="#next">What comes next</a>
@@ -528,158 +325,50 @@
         </div>
 
         <p>
-          Teserac's Command Center says the shift starts here. Inside that sentence is a human problem that
-          mission critical infrastructure cannot avoid: at 19:00 an operator goes home and another one takes
-          responsibility for the building. What changed in the last twelve hours? What was investigated and
-          deliberately left open? What must the incoming operator not touch, because someone already decided
-          otherwise and had a reason?
+          At 19:00 one operator goes home and another takes responsibility for the building. What changed?
+          What was investigated and deliberately left open? What must the new operator not touch, because
+          someone already decided otherwise?
         </p>
-
         <p>
-          Neuron already holds the raw ingredients. Telemetry, topology, incidents, procedures, history, and
-          the decisions operators make. The gap is not data. It is that most systems preserve <em>what
-          happened</em> and lose <em>why a person chose what they chose</em>. Teserac's own positioning names
-          a shrinking skilled workforce as a core industry problem. Capturing resolved tickets for future
-          search is one answer. This prototype proposes a stronger one.
+          Neuron already holds the telemetry, topology, incidents, and procedures. The gap is not data. Most
+          systems keep <em>what happened</em> and lose <em>why a person chose what they chose</em>.
         </p>
 
         <div class="thesis">
-          <p>
-            Do not only preserve knowledge for later search. Put the right knowledge into the exact moment
-            responsibility changes hands.
-          </p>
-          <div class="attrib">The product thesis this prototype exists to test</div>
+          <p>Do not only preserve knowledge for later search. Put the right knowledge into the exact moment responsibility changes hands.</p>
+          <div class="attrib">The product thesis this prototype tests</div>
         </div>
 
         <p>
-          The same idea extends to the model. When Neuron recommends something consequential, the operator is
-          the one accountable. So the recommendation, the decision, and the reasoning behind the decision all
-          belong in the same record that the next shift inherits.
+          The same applies to the model. Neuron proposes, the operator decides, and the decision and its
+          reason become the record the next shift inherits.
         </p>
-
-        <figure>
-          <div class="diagram">
-            <svg viewBox="0 0 720 190" role="img" aria-label="A four step loop: Neuron proposes, the operator decides, the decision is recorded, the next shift inherits it, and the loop returns to Neuron proposing.">
-              <defs>
-                <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-                  <path d="M 0 0 L 10 5 L 0 10 z" class="d-arrow"></path>
-                </marker>
-              </defs>
-
-              <rect class="d-box" x="4" y="30" width="150" height="58" rx="3"></rect>
-              <text class="d-label" x="79" y="55" text-anchor="middle">Neuron proposes</text>
-              <text class="d-sub" x="79" y="72" text-anchor="middle">WITH EVIDENCE</text>
-
-              <rect class="d-box" x="190" y="30" width="150" height="58" rx="3"></rect>
-              <text class="d-label" x="265" y="55" text-anchor="middle">Operator decides</text>
-              <text class="d-sub" x="265" y="72" text-anchor="middle">GATED BY RISK</text>
-
-              <rect class="d-box" x="376" y="30" width="150" height="58" rx="3"></rect>
-              <text class="d-label" x="451" y="55" text-anchor="middle">Decision recorded</text>
-              <text class="d-sub" x="451" y="72" text-anchor="middle">WITH THE REASON</text>
-
-              <rect class="d-box" x="562" y="30" width="154" height="58" rx="3"></rect>
-              <text class="d-label" x="639" y="55" text-anchor="middle">Next shift inherits</text>
-              <text class="d-sub" x="639" y="72" text-anchor="middle">AT HANDOFF</text>
-
-              <path class="d-line" d="M 158 59 L 184 59" marker-end="url(#ar)"></path>
-              <path class="d-line" d="M 344 59 L 370 59" marker-end="url(#ar)"></path>
-              <path class="d-line" d="M 530 59 L 556 59" marker-end="url(#ar)"></path>
-              <path class="d-line" d="M 639 92 L 639 132 Q 639 146 625 146 L 93 146 Q 79 146 79 132 L 79 94" marker-end="url(#ar)"></path>
-              <text class="d-sub" x="359" y="167" text-anchor="middle">CONTEXT FOR THE NEXT PROPOSAL</text>
-            </svg>
-          </div>
-          <figcaption>
-            The loop the prototype closes. The AI proposes, the human disposes, and the disposal is what
-            gets inherited.
-          </figcaption>
-        </figure>
       </section>
-
 
       <section id="who">
         <div class="section-head">
           <span class="section-label">Who it is for</span>
           <h2>The operator who takes control at 19:00</h2>
-          <p>Not the facility. Not the fleet. One person, at one moment, with a building to answer for.</p>
+          <p>One person, arriving rather than leaving, with a building to answer for.</p>
         </div>
 
-        <p>
-          The organization buying this runs mission critical facilities around the clock. Colocation
-          providers, hyperscale operators, and enterprises with their own data halls. What they sell is
-          uptime, and uptime is defended by a small team that is physically present twenty four hours a day.
-        </p>
-
-        <p>
-          The user is one of those people, and specifically the one <em>arriving</em> rather than the one
-          leaving. Every design decision in this prototype was made for them.
-        </p>
-
         <dl class="inventory">
-          <div class="inv-row">
-            <dt>The role</dt>
-            <dd>Critical facilities technician, shift engineer, or data center operations engineer. The title moves around by operator; the accountability does not.</dd>
-          </div>
-          <div class="inv-row">
-            <dt>Where they came from</dt>
-            <dd>Often a trade or a military route. Electricians, HVAC technicians, and Navy trained power plant operators are all common paths into the seat.</dd>
-          </div>
-          <div class="inv-row">
-            <dt>The rhythm</dt>
-            <dd>Twelve hour shifts on rotation. Handover happens twice a day, every day, permanently. It is the most repeated moment in the entire operation.</dd>
-          </div>
-          <div class="inv-row">
-            <dt>Answerable for</dt>
-            <dd>Uptime, safe switching, executing approved procedures, and knowing the moment something needs to go up the chain.</dd>
-          </div>
-          <div class="inv-row">
-            <dt>Tools they live in</dt>
-            <dd>A building management system, an electrical power monitoring system, a work order system, and a shift log that is frequently a notebook or a spreadsheet.</dd>
-          </div>
-          <div class="inv-row">
-            <dt>The pressure</dt>
-            <dd>The deepest experience in the room is retiring. The people replacing it have a fraction of the years, and the knowledge that is leaving was never written down.</dd>
-          </div>
+          <div class="inv-row"><dt>The role</dt><dd>Critical facilities technician or shift engineer. Often from a trade or a military route.</dd></div>
+          <div class="inv-row"><dt>The rhythm</dt><dd>Twelve-hour shifts. Handover happens twice a day, every day. It is the most repeated moment in the operation.</dd></div>
+          <div class="inv-row"><dt>Tools</dt><dd>A building management system, a power monitoring system, work orders, and a shift log that is often a notebook.</dd></div>
+          <div class="inv-row"><dt>The pressure</dt><dd>The most experienced people are retiring, and what they know was never written down.</dd></div>
         </dl>
 
-        <h3 class="sub">What actually makes the handoff hard</h3>
-        <p>Three things, and only one of them is a data problem.</p>
-
+        <h3 class="sub">Why the handoff is hard</h3>
         <ul class="clean">
-          <li><strong>The window is short.</strong> A handover is fifteen to thirty minutes, often less, and it competes with everything else happening at the top of a shift. Nobody reads a twelve hour history.</li>
-          <li><strong>The valuable information is the negative space.</strong> The outgoing operator knows what they looked at and deliberately chose to leave alone. That set is invisible to everyone else, and it never survives a verbal handover.</li>
-          <li><strong>The costliest mistake is undoing a decision.</strong> Not missing an alarm. Touching something a colleague deliberately left in place, without knowing they had a reason, is how a stable situation becomes an incident.</li>
-        </ul>
-
-        <p>
-          That third point is why the decision record has a <em>why</em> field and a <em>who</em> field, and
-          why deferring a recommendation forces you to name the trigger that brings it back. The format is
-          not a documentation exercise. It is the specific shape of the failure it prevents.
-        </p>
-
-        <h3 class="sub">Who else is in frame</h3>
-
-        <ul class="clean">
-          <li><strong>The outgoing operator</strong> produces the record but never reads it. They are the least served person in this prototype, and closing that gap is the first thing I would build.</li>
-          <li><strong>The chief engineer or facility manager</strong> would want the decision history as an audit trail, particularly after an incident. The data model supports it; no view has been built for it.</li>
-          <li><strong>The new operator</strong> is who the learning layer serves. They are deliberately not the core user, which is exactly why that layer is separable and switched off by default.</li>
+          <li><strong>The window is short.</strong> Fifteen to thirty minutes. Nobody reads a twelve-hour history.</li>
+          <li><strong>The valuable part is what was left alone.</strong> The outgoing operator knows what they looked at and chose not to touch. That never survives a verbal handover.</li>
+          <li><strong>The costliest mistake is undoing a decision.</strong> Touching something a colleague left in place on purpose is how a stable situation becomes an incident.</li>
         </ul>
 
         <div class="limits">
-          <h3 class="sub" style="margin-top:0">What I do not know about them</h3>
-          <p>
-            This profile is built from public material and reasoning. I have not interviewed a single
-            operator, so it should be read as a stated hypothesis rather than a finding.
-          </p>
-          <ul class="clean">
-            <li>Whether six fields is the right shape for a decision record, or whether an operator under time pressure would fill in two and leave the rest.</li>
-            <li>Whether the handoff moment is genuinely felt as a problem, or whether the existing verbal ritual works better than it looks from outside.</li>
-            <li>Whether "what you need to do" is welcome, or reads as a previous shift telling a peer how to do their job.</li>
-          </ul>
-          <p style="margin-bottom:0">
-            Each of those is answerable in one conversation with one operator, which is why that sits at the
-            top of what comes next.
-          </p>
+          <h3 class="sub" style="margin-top:0">What I do not know</h3>
+          <p style="margin-bottom:0">This profile comes from public material and reasoning, not interviews. Whether six fields is the right shape, and whether "what you need to do" reads as help or as a peer giving orders, are questions for one conversation with one operator.</p>
         </div>
       </section>
 
@@ -687,299 +376,237 @@
         <div class="section-head">
           <span class="section-label">What is built</span>
           <h2>One workflow, end to end</h2>
-          <p>Not a suite of screens. A single path an operator would actually walk at the top of a shift.</p>
+          <p>A single path an operator would walk at the top of a shift.</p>
         </div>
 
-        <dl class="inventory">
-          <div class="inv-row">
-            <dt>Shift Brief</dt>
-            <dd>
-              Opens on load. Three inherited items, each carrying a six field decision record: what changed,
-              what we know, what was decided, why, who decided, and what you need to do. Plus a diff of what
-              changed since the handoff, typed as New, Changed, Resolved, and No change.
-            </dd>
+        <div class="split" style="--shot-w: 360px">
+          <div>
+            <dl class="inventory" style="margin-top:0">
+              <div class="inv-row"><dt>Shift brief</dt><dd>Three inherited items, each with a six-field record: what changed, what we know, what was decided, why, who decided, and what you need to do.</dd></div>
+              <div class="inv-row"><dt>Power path</dt><dd>A one-line diagram from the utility feed to the racks. Power visibly flows along it.</dd></div>
+              <div class="inv-row"><dt>Ask</dt><dd>Questions Neuron already answered for the selected asset. No prompt to write.</dd></div>
+              <div class="inv-row"><dt>Impact</dt><dd>What a failure would do right now, computed from the topology and drawn on the graph.</dd></div>
+              <div class="inv-row"><dt>Decisions</dt><dd>Four ways to respond to a recommendation, with friction that scales with how hard the action is to undo.</dd></div>
+              <div class="inv-row"><dt>Learning layer</dt><dd>Definitions and a self test in their own color, off by default.</dd></div>
+              <div class="inv-row"><dt>Guided tour</dt><dd>Seven steps for a visitor exploring alone.</dd></div>
+            </dl>
           </div>
-          <div class="inv-row">
-            <dt>Power path canvas</dt>
-            <dd>
-              An electrical single line from the utility feed to the racks. Draggable, with persisted layout
-              and a reset. Assets that owe a decision are marked, and pinned cards anchor to the asset they
-              concern.
-            </dd>
-          </div>
-          <div class="inv-row">
-            <dt>Ask</dt>
-            <dd>
-              Questions Neuron already answered for the selected asset, so there is no prompt to compose.
-              Every answer cites assets by name. Two of the questions are computed from the topology rather
-              than written by hand.
-            </dd>
-          </div>
-          <div class="inv-row">
-            <dt>Impact</dt>
-            <dd>
-              What a failure of this asset would do right now, split into what loses power and what a
-              redundant path still holds, drawn onto the graph. Computed from the topology, not authored.
-            </dd>
-          </div>
-          <div class="inv-row">
-            <dt>Decision layer</dt>
-            <dd>
-              A recommendation, a visible autonomy ladder, and four ways to respond. Friction scales with how
-              hard the action is to undo. The result pins to the canvas and joins the shift brief.
-            </dd>
-          </div>
-          <div class="inv-row">
-            <dt>Learning layer</dt>
-            <dd>
-              An onboarding overlay in its own color, off by default. Definitions, a glossary for the
-              acronyms on screen, and an optional self test.
-            </dd>
-          </div>
-        </dl>
+          <figure>
+            <a class="shot" href="/case-study-media/brief.webp">
+              <img src="/case-study-media/brief.webp" width="1280" height="2088" loading="lazy" alt="The shift brief. Item 01, UPS-A1 battery impedance, is open and shows six rows from what changed to what you need to do, with an Open on graph button. Below it, a list of what changed since 19:02.">
+            </a>
+            <figcaption>The shift brief opens on load. Each item keeps the reasoning, not only the data.</figcaption>
+          </figure>
+        </div>
       </section>
 
       <section id="chat">
         <div class="section-head">
           <span class="section-label">Position</span>
           <h2>Chat is the right fallback and the wrong default</h2>
-          <p>The most directly relevant opinion I can offer, given where the product has already been.</p>
         </div>
 
         <p>
-          Neuron started as a chat interface and moved away from it. I think the reason is specific and worth
-          naming. A chat box asks the operator to supply the question at the exact moment they have the least
-          time and the least certainty about what to ask. And a chat answer is a dead end. It does not attach
-          to an asset, it does not persist, and the next shift cannot inherit it.
+          A chat box asks the operator for the question at the moment they have the least time and the least
+          certainty about what to ask. Its answer does not attach to an asset, does not persist, and cannot be
+          inherited. So every AI surface here follows three rules.
         </p>
-
-        <p>
-          The replacement is not a different text box. It is three rules, and every AI surface in this
-          prototype follows them.
-        </p>
-
         <ul class="clean">
-          <li><strong>The AI attaches to objects, not to a conversation.</strong> Selecting an asset is the query. The panel is scoped to that asset and nothing else.</li>
-          <li><strong>Its output is interface state, not prose.</strong> The Impact view answers "what happens if this fails" by drawing on the graph. That answer cannot be given well in a chat window, which is the point.</li>
-          <li><strong>Anything accepted or overridden becomes part of the record.</strong> That is what makes AI reasoning inheritable rather than disposable.</li>
+          <li><strong>It attaches to objects.</strong> Selecting an asset is the query.</li>
+          <li><strong>Its output is interface state.</strong> "What happens if this fails" is answered by drawing on the graph.</li>
+          <li><strong>What you accept or override joins the record.</strong> That makes AI reasoning inheritable.</li>
         </ul>
-
         <p>
-          What chat is genuinely good at is the open ended question nobody anticipated. That is a real
-          strength, and it is why the position is "wrong default" rather than "wrong idea". A command bar
-          that takes natural language and returns a reconfigured interface, rather than a paragraph, would
-          keep that strength without the weaknesses. I scoped it out and did not build it.
+          Chat is still good at the question nobody anticipated. A command bar that returns a reconfigured
+          interface instead of a paragraph would keep that strength. I scoped it out.
         </p>
       </section>
 
       <section id="decisions">
         <div class="section-head">
           <span class="section-label">Design decisions</span>
-          <h2>The calls, and what each one is arguing against</h2>
+          <h2>The calls, and what each one argues against</h2>
         </div>
 
-        <article class="entry">
-          <h3>Autonomy is shown, not implied</h3>
-          <p>
-            Every recommendation displays three tiers: what Neuron does alone, what needs approval, and what
-            it must never touch. On the load transfer, "initiate the transfer" and "place the unit in bypass"
-            are both rendered struck through.
-          </p>
-          <dl class="field">
-            <dt>Why</dt>
-            <dd>A promise about behavior is more reassuring than a confidence score. Confidence says how sure the model is. The ladder says what it is allowed to do, which is the thing an operator actually needs to trust.</dd>
-          </dl>
-        </article>
+        <div class="split split--flip" style="--shot-w: 380px">
+          <figure>
+            <a class="shot" href="/case-study-media/gate.webp">
+              <img src="/case-study-media/gate.webp" width="1240" height="1566" loading="lazy" alt="The decision dialog for transferring critical load. It lists what Neuron does alone, what needs approval, and what it never does, with the last two struck through. Approve is selected, four pre-flight checks are ticked, and UPS-A1 is typed into the confirmation field.">
+            </a>
+            <figcaption>A consequential approval: four checks and the asset name typed back.</figcaption>
+          </figure>
+          <div class="entries">
+            <article class="entry">
+              <h3>Autonomy is shown, not implied</h3>
+              <p>Every recommendation lists what Neuron does alone, what needs approval, and what it must never touch. <span class="why">Why</span>A promise about behavior builds more trust than a confidence score.</p>
+            </article>
+            <article class="entry">
+              <h3>Friction scales with reversibility</h3>
+              <p>Raising an alert threshold is one click. Transferring critical load takes four checks and the asset name. <span class="why">Why</span>A one-click approve on a consequential action invites rubber stamping.</p>
+            </article>
+            <article class="entry">
+              <h3>Approve and Reject is the wrong pair</h3>
+              <p>The choices are Approve, Defer with a trigger, Approve with changes, and Reject. Deferring names what brings it back. Overriding requires a reason. <span class="why">Why</span>In operations the common right answer is "not yet". And an override is an expert disagreeing with the model, which is exactly the knowledge the industry is losing.</p>
+            </article>
+          </div>
+        </div>
 
-        <article class="entry">
-          <h3>Friction scales with reversibility</h3>
-          <p>
-            Raising an alert threshold is one click, and the dialog says so. Transferring critical load
-            requires four pre flight steps acknowledged and the asset name typed back before the button
-            unlocks.
-          </p>
-          <dl class="field">
-            <dt>Why</dt>
-            <dd>A one click approve on a consequential action invites rubber stamping. Effort should be proportional to what the action costs to undo, which is how methods of procedure already work in this industry.</dd>
-          </dl>
-        </article>
+        <div class="split" style="--shot-w: 280px">
+          <div class="entries">
+            <article class="entry">
+              <h3>The learning layer is not the product</h3>
+              <p>An earlier version taught the domain inside the operator tool. That was wrong. Real operators know what a PDU is. The teaching now lives in a separate violet layer, off by default. <span class="why">Why</span>I am not the user. My training wheels should switch off.</p>
+            </article>
+            <article class="entry">
+              <h3>Pinned cards anchor to assets</h3>
+              <p>A recorded decision pins itself beside its asset, moves with it, and stays readable at any zoom. <span class="why">Next</span>The pinned arrangement should travel in the handoff too.</p>
+            </article>
+            <article class="entry">
+              <h3>The power path runs top to bottom</h3>
+              <p>The first layout ran left to right in a tall canvas and rendered at about sixty percent zoom. One-line diagrams are usually drawn source at the top, load at the bottom. Following that convention made the graph readable on a laptop.</p>
+            </article>
+            <article class="entry">
+              <h3>Motion carries state, never decoration</h3>
+              <p>Power flows along live lines and stops where a failure would cut it. The graph powers up when you take the shift, marking the moment responsibility changes hands. Recording a decision settles one green ring on the asset.</p>
+            </article>
+          </div>
+          <figure>
+            <a class="shot" href="/case-study-media/learning.webp">
+              <img src="/case-study-media/learning.webp" width="692" height="1696" loading="lazy" alt="The asset panel for Switchgear SWGR-A after approval, with the violet learning layer below it explaining what switchgear is.">
+            </a>
+            <figcaption>The learning layer sits below the operator panel, in its own color.</figcaption>
+          </figure>
+        </div>
+      </section>
 
-        <article class="entry">
-          <h3>Approve and Reject is the wrong pair</h3>
-          <p>
-            The choices are Approve, Defer with a trigger, Approve with changes, and Reject. Deferring
-            requires naming the condition that would bring it back. Rejecting or modifying requires a reason.
-          </p>
-          <dl class="field">
-            <dt>Why</dt>
-            <dd>In operations the most common correct answer is neither approve nor reject. It is "not yet, and here is what would change my mind." Deferring with a trigger is what produces a line like "reassess if runtime falls below 6.0 minutes", which is the most useful sentence in the whole handoff.</dd>
-            <dt>And</dt>
-            <dd>An override is the most valuable event in the system. It is an experienced operator disagreeing with the model, which is exactly the expertise the industry is losing. Most tools only log approvals. This one requires the reason.</dd>
-          </dl>
-        </article>
+      <section id="visitor">
+        <div class="section-head">
+          <span class="section-label">The unguided visitor</span>
+          <h2>Designing for someone nobody is walking through it</h2>
+          <p>The first version assumed I would present it. In a portfolio, nobody does.</p>
+        </div>
 
-        <article class="entry">
-          <h3>The learning layer is not the product</h3>
-          <p>
-            An earlier version of this prototype taught the domain inside the operator tool, with the same
-            knowledge check attached to every asset. That was wrong. Real operators know what a power
-            distribution unit is. The teaching material is now a separate overlay in its own color, off by
-            default.
-          </p>
-          <dl class="field">
-            <dt>Why</dt>
-            <dd>I am not the user. Building my own onboarding scaffolding into the operator's tool would have made the product worse to serve the designer. Separating it lets the app open looking like something a professional would use, and lets me switch my own training wheels on when I need them.</dd>
-          </dl>
-        </article>
+        <p>
+          A visitor arrives from a link, has a couple of minutes, and does not know the domain. So the
+          prototype makes its own argument. On a first visit, a guided tour opens beside the shift brief and
+          covers the core ideas in seven steps.
+        </p>
 
-        <article class="entry">
-          <h3>Canvas widgets anchor to assets</h3>
-          <p>
-            A pinned card attaches to the asset it concerns, travels with it when the node moves,
-            counter scales so its text stays legible at any zoom, and collapses to a pill when zoomed out.
-          </p>
-          <dl class="field">
-            <dt>Why</dt>
-            <dd>A widget that floats free is a dashboard tile that happens to sit on a canvas, and it gets nothing from the spatial layout. Anchoring makes the topology the organizing principle.</dd>
-            <dt>Extension</dt>
-            <dd>The natural next step is that the pinned arrangement travels in the handoff. Widgets become the operator's working memory, and working memory should be inheritable.</dd>
-          </dl>
-        </article>
+        <figure>
+          <a class="shot" href="/case-study-media/tour.webp">
+            <img src="/case-study-media/tour.webp" width="2880" height="1800" loading="lazy" alt="The guided tour on step 5 of 7. A light card reads: now compare a single point of failure. PDU-05 is ringed on the graph, both racks below it are dark with struck-through readings, and the task Select PDU-05 on the graph is checked off.">
+          </a>
+          <figcaption>Step 5 of 7. The card places itself where it hides the fewest assets, so both dark racks stay in view.</figcaption>
+        </figure>
+
+        <ul class="clean">
+          <li><strong>Every step asks for a real action.</strong> A ring points at the real control. A tour that describes buttons is a slideshow; one that asks you to press them lets the product demonstrate the claim.</li>
+          <li><strong>Steps complete on state, not on clicks.</strong> The tour moves on when the app reaches the state a step asks for, however the visitor got there. Exploring ahead is never punished.</li>
+          <li><strong>"Do it for me", with one exception.</strong> Every task can be performed for you, except the consequential approval. The tour opens that dialog but will not tick the checks, because that would contradict the point of the step.</li>
+        </ul>
+
+        <div class="split" style="--shot-w: 220px">
+          <div>
+            <h3 class="sub" style="margin-top:0">Phones get their own page</h3>
+            <p style="color:var(--ink-2)">The console needs a laptop-sized screen. Below 1000 pixels, a visitor sees the idea, what the colors mean, and a link here, instead of a squeezed layout.</p>
+          </div>
+          <figure>
+            <a class="shot" href="/case-study-media/phone.webp">
+              <img src="/case-study-media/phone.webp" width="780" height="1688" loading="lazy" alt="The phone page: a small power path diagram, the headline what a night-shift operator inherits and what they still owe, and three lines explaining red, amber, and deciding.">
+            </a>
+          </figure>
+        </div>
       </section>
 
       <section id="color">
         <div class="section-head">
           <span class="section-label">Color semantics</span>
           <h2>One meaning per color</h2>
-          <p>Amber was carrying two jobs badly. Splitting them was the highest value small change in the build.</p>
+          <p>The chrome carries no hue at all. Color only ever means state.</p>
         </div>
 
         <div class="swatches">
-          <div class="swatch">
-            <span class="chip chip-good" aria-hidden="true"></span>
-            <div>
-              <h4>Green: nothing to see</h4>
-              <p>Healthy equipment, and decisions that have been made and closed.</p>
-            </div>
-          </div>
-          <div class="swatch">
-            <span class="chip chip-warn" aria-hidden="true"></span>
-            <div>
-              <h4>Amber: the equipment has a condition</h4>
-              <p>A state of the world. Something is drifting or loaded, and it is worth watching.</p>
-            </div>
-          </div>
-          <div class="swatch">
-            <span class="chip chip-crit" aria-hidden="true"></span>
-            <div>
-              <h4>Red: a human owes a decision</h4>
-              <p>A state of the work, not the plant. The asset pulses and says "Needs your review" on the card. Deciding clears it.</p>
-            </div>
-          </div>
+          <div class="swatch"><span class="chip chip-good" aria-hidden="true"></span><div><h4>Green: flowing, or decided</h4><p>Healthy power, and decisions that were made.</p></div></div>
+          <div class="swatch"><span class="chip chip-warn" aria-hidden="true"></span><div><h4>Amber: a condition to watch</h4><p>A state of the equipment.</p></div></div>
+          <div class="swatch"><span class="chip chip-crit" aria-hidden="true"></span><div><h4>Red: a person owes a decision</h4><p>A state of the work, not the plant. Deciding clears it.</p></div></div>
+          <div class="swatch"><span class="chip chip-off" aria-hidden="true"></span><div><h4>Gray dashes: power would be lost</h4><p>Not a color, because loss of power is an absence.</p></div></div>
         </div>
 
         <p>
-          The proof case is <span class="mono">Rack R-42</span>. It sits at 92 percent of its power budget,
-          so it stays amber for the whole walkthrough. Nobody owes a decision on it. Meanwhile
-          <span class="mono">UPS-A1</span> and <span class="mono">SWGR-A</span> are red, because a
-          recommendation is sitting there undecided.
+          The proof case is <span class="mono">Rack R-42</span>. It sits at 92 percent of its budget and stays
+          amber, because nobody owes a decision on it. The canvas shows where judgment is outstanding, not just
+          where the plant is unhappy.
         </p>
 
+        <div class="pair-wrap">
+          <div class="pair">
+            <figure>
+              <p class="pair-label">Before: two decisions owed</p>
+              <a class="shot" href="/case-study-media/colors.webp">
+                <img src="/case-study-media/colors.webp" width="1670" height="1696" loading="lazy" alt="The power path at rest. SWGR-A and UPS-A1 are outlined in red with Needs your decision. Rack R-42 reads 18.6 kW in amber.">
+              </a>
+            </figure>
+            <figure>
+              <p class="pair-label">After: both decided and pinned</p>
+              <a class="shot" href="/case-study-media/decided.webp">
+                <img src="/case-study-media/decided.webp" width="1670" height="1696" loading="lazy" alt="The same power path after both recommendations were approved. No red remains. Each asset reads Decided by you, and a green Approved card is pinned beside each one.">
+              </a>
+            </figure>
+          </div>
+          <figcaption>Deciding both recommendations clears every red outline. Rack R-42 stays amber throughout.</figcaption>
+        </div>
+
+        <h3 class="sub">Losing power is shown as absence, not as red</h3>
         <p>
-          The result is that the canvas shows where human judgment is outstanding, not just where the plant
-          is unhappy. Both counts appear in the toolbar, and the red survives at fit to view zoom and in the
-          minimap. Deciding both recommendations turns every red outline green by the end of the demo.
+          An earlier version drew the failure preview in dashed red. That gave red a second meaning right
+          after the visitor learned it means "your call". Now the flow stops, the line turns to gray dashes,
+          and the asset goes dark. A dark rack is what losing power looks like.
         </p>
+
+        <div class="pair-wrap">
+          <div class="pair">
+            <figure>
+              <p class="pair-label">If UPS-A1 fails</p>
+              <a class="shot" href="/case-study-media/impact-ups.webp">
+                <img src="/case-study-media/impact-ups.webp" width="1670" height="1472" loading="lazy" alt="Failure preview for UPS-A1. Its lines are dashed, but PDU-05 and both racks are outlined in green and labeled Held by redundancy.">
+              </a>
+            </figure>
+            <figure>
+              <p class="pair-label">If PDU-05 fails</p>
+              <a class="shot" href="/case-study-media/impact-pdu.webp">
+                <img src="/case-study-media/impact-pdu.webp" width="1670" height="1472" loading="lazy" alt="Failure preview for PDU-05. Both racks below it go dark with dashed outlines, struck-through readings, and the label Loses power.">
+              </a>
+            </figure>
+          </div>
+          <figcaption>Redundancy holds everything below UPS-A1. PDU-05 has no twin, so both racks go dark. Neither result is written by hand.</figcaption>
+        </div>
       </section>
 
       <section id="technical">
         <div class="section-head">
           <span class="section-label">Technical decisions</span>
-          <h2>Where the engineering actually went</h2>
-          <p>Stack is React 19, TypeScript, Vite, and React Flow. The interesting parts are not the stack.</p>
+          <h2>Where the engineering went</h2>
+          <p>React 19, TypeScript, Vite, and React Flow. The interesting parts are not the stack.</p>
         </div>
 
-        <article class="entry">
-          <h3>The graph nodes were lying about being draggable</h3>
-          <p>
-            The first version rendered nodes that looked draggable and were not. React Flow only writes a
-            position change back to its own store when you use its uncontrolled mode. In controlled mode it
-            hands the change to your callback, and this app passed nodes with no callback, so every drag was
-            computed and discarded.
-          </p>
-          <dl class="field">
-            <dt>Method</dt>
-            <dd>Found it by reading the library's own <span class="mono">triggerNodeChanges</span> source rather than guessing, then confirmed it in the browser by dragging a node 86 pixels and measuring that it had not moved.</dd>
-            <dt>Principle</dt>
-            <dd>Never ship an affordance you cannot honour. The fix belonged at the state layer, not on the surface.</dd>
-          </dl>
-        </article>
-
-        <article class="entry">
-          <h3>Impact is computed, not written</h3>
-          <p>
-            The failure preview removes the selected asset from the graph and re runs reachability from the
-            utility source. Anything that becomes unreachable loses power. Anything downstream that is still
-            reachable is held by a redundant path.
-          </p>
-          <dl class="field">
-            <dt>Result</dt>
-            <dd>Failing <span class="mono">UPS-A1</span> drops nothing, because the B path still feeds the same distribution unit. Failing <span class="mono">PDU-05</span> drops two racks with nothing covering them. Neither number is authored, so the model stays honest if the topology changes.</dd>
-          </dl>
-        </article>
-
-        <article class="entry">
-          <h3>Widgets render through the viewport, not as graph nodes</h3>
-          <p>
-            Pinned cards could have been added as React Flow nodes with a parent relationship. Instead they
-            render through the viewport portal and position themselves from their anchor's coordinates.
-          </p>
-          <dl class="field">
-            <dt>Why</dt>
-            <dd>Adding a second node type would have widened the node union across selection, persistence, drag handling, and the impact overlay, for no gain. The portal keeps widgets out of that system entirely while still panning and zooming with the canvas.</dd>
-            <dt>Detail</dt>
-            <dd>Drag converts screen pixels to graph coordinates by dividing by the zoom level, and uses a four pixel threshold so a click on a collapsed pill still selects its asset instead of being swallowed by the drag handler.</dd>
-          </dl>
-        </article>
-
-        <article class="entry">
-          <h3>A production bug that would have broken the demo</h3>
-          <p>
-            The deployment config rewrote every unmatched path to the app shell. So a request for an asset
-            that no longer existed returned 200 with an HTML body instead of a 404. During a deploy rollover
-            a cached page asked for an asset hash that had already rolled, the browser refused the response
-            on its content type, and the app rendered nothing.
-          </p>
-          <dl class="field">
-            <dt>Fix</dt>
-            <dd>Assets are excluded from the rewrite so a missing one returns a real 404. Hashed assets are marked immutable and the entry document revalidates, so a stale page is never served against fresh assets.</dd>
-            <dt>Caught by</dt>
-            <dd>Loading the deployed URL in a browser and reading the console, not by trusting that a green build meant a working site.</dd>
-          </dl>
-        </article>
-
-        <article class="entry">
-          <h3>Persistence had a dependency that was easy to miss</h3>
-          <p>
-            Persisting pinned widgets required persisting decisions too. A restored decision card with no
-            decision behind it would render empty. Orphans are dropped on load, and stored entries are
-            validated against known asset ids before use.
-          </p>
-          <dl class="field">
-            <dt>Consequence</dt>
-            <dd>Because decisions now survive a reload, a demo could get stuck in a used state. So there is a control that clears pins and decisions and returns every recommendation to its untouched state.</dd>
-          </dl>
-        </article>
-
-        <article class="entry">
-          <h3>Accessibility, done as part of the work</h3>
-          <p>
-            Graph nodes are keyboard selectable with a visible focus ring, and Enter or Space updates the
-            panel. The asset tabs follow the standard pattern, so only the active tab is in the tab order and
-            arrow keys move between them. Dialogs trap focus and return it on close. Quiz feedback is
-            announced through a live region. Motion respects the reduced motion preference.
-          </p>
-        </article>
+        <div class="entries">
+          <article class="entry">
+            <h3>The nodes were lying about being draggable</h3>
+            <p>React Flow in controlled mode hands position changes to a callback, and the app passed none, so every drag was discarded. I found it by reading the library's <span class="mono">triggerNodeChanges</span> source, then confirmed it by dragging a node 86 pixels and measuring that it had not moved. <span class="why">Principle</span>Never ship an affordance you cannot honor.</p>
+          </article>
+          <article class="entry">
+            <h3>Impact is computed, not written</h3>
+            <p>The preview removes the selected asset and reruns reachability from the utility source. Unreachable means it loses power. Still reachable downstream means redundancy holds it. The numbers stay honest if the topology changes.</p>
+          </article>
+          <article class="entry">
+            <h3>A deploy bug that would have blanked the demo</h3>
+            <p>The host rewrote every unmatched path to the app shell, so a missing asset returned HTML with a 200. During a rollover the browser refused it and rendered nothing. Assets now return a real 404, hashed files are immutable, and the entry page revalidates. I caught it by loading the deployed site and reading the console, not by trusting a green build.</p>
+          </article>
+          <article class="entry">
+            <h3>Accessibility as part of the work</h3>
+            <p>Nodes are keyboard selectable. Tabs follow the standard arrow-key pattern. Dialogs trap focus, and the tour card joins that loop. All continuous motion stops under the reduced motion preference, and every colored state is also named in text.</p>
+          </article>
+        </div>
       </section>
 
       <section id="next">
@@ -990,12 +617,11 @@
         </div>
 
         <ul class="clean">
-          <li><strong>Put it in front of one real operator before adding anything.</strong> The decision record has six fields because six felt right to me, not because anyone who runs a facility told me so. That is the assumption most worth breaking early.</li>
-          <li><strong>An authoring flow for the outgoing operator.</strong> Today the handoff is read only. The real design problem is the hard one: how do you get a tired operator at 18:55 to write one honest sentence explaining why? Everything downstream depends on solving that.</li>
-          <li><strong>A decision timeline.</strong> Scrub from the first anomaly to the current moment and watch model confidence and human decisions move together. It makes the relationship between evidence arriving and judgment changing visible.</li>
-          <li><strong>Challenge this assessment.</strong> Show supporting evidence, contradicting evidence, and missing evidence for a recommendation, then let the operator ask what would make the diagnosis wrong. Trust needs a way to argue back.</li>
-          <li><strong>Widget layouts that travel in the handoff.</strong> Inherit the previous operator's arrangement, not only their notes.</li>
-          <li><strong>Progressive node detail by zoom.</strong> At fit to view on a laptop the asset names are small. Detail should resolve as you zoom rather than being fixed.</li>
+          <li><strong>Put it in front of one real operator.</strong> Six fields felt right to me. Nobody who runs a facility has told me so.</li>
+          <li><strong>An authoring flow for the outgoing operator.</strong> How do you get a tired operator at 18:55 to write one honest sentence about why? Everything depends on that.</li>
+          <li><strong>A decision timeline.</strong> Scrub from the first anomaly to now and watch model confidence and human decisions move together.</li>
+          <li><strong>Challenge this assessment.</strong> Show supporting, contradicting, and missing evidence. Trust needs a way to argue back.</li>
+          <li><strong>Detail that resolves with zoom.</strong> Eight assets fit on a laptop. A real site has hundreds.</li>
         </ul>
       </section>
 
@@ -1006,17 +632,16 @@
         </div>
 
         <div class="limits">
-          <ul class="clean">
-            <li><strong>Every value is simulated.</strong> Names, times, thresholds, and procedures are fictional, and the interface says so in three places rather than hiding it.</li>
-            <li><strong>No model is called.</strong> The reasoning and the confidence figures are written, and labeled as illustrative wherever they appear.</li>
-            <li><strong>Generators are not modeled.</strong> So a utility failure shows everything dropping. The impact panel states this rather than quietly implying the site has no backup.</li>
-            <li><strong>Domain assumptions are flagged in the interface</strong>, on the assets where I was least confident, so an expert can correct me instead of guessing what I assumed.</li>
-            <li><strong>No authentication, no server, no real telemetry.</strong> Persistence is the browser's local storage only.</li>
-            <li><strong>I do not claim to know data center operations.</strong> I claim to have learned enough to build something an expert can correct, and to have marked exactly where the corrections should go.</li>
+          <ul class="clean" style="margin-top:0">
+            <li><strong>Every value is simulated</strong>, and the interface says so.</li>
+            <li><strong>No model is called.</strong> Reasoning and confidence figures are written and labeled illustrative.</li>
+            <li><strong>Generators are not modeled</strong>, and the impact panel says so.</li>
+            <li><strong>Domain assumptions are flagged</strong> on the assets where I was least sure, so an expert can correct them.</li>
+            <li><strong>No server, no real telemetry, and no phone console.</strong> Persistence is local storage only.</li>
+            <li><strong>I do not claim to know data center operations.</strong> I claim to have learned enough to build something an expert can correct.</li>
           </ul>
         </div>
       </section>
-
 
       <section id="open">
         <div class="section-head">
@@ -1026,193 +651,43 @@
         </div>
 
         <div class="thesis">
-          <p style="margin-bottom:0">
-            If a facility were minutes from going down, and the only person on site was the newest
-            member of the team, could an intelligence layer carry them? Or is software of this kind
-            permanently reserved for people who already hold the expertise?
-          </p>
+          <p>If a facility were minutes from going down and the only person on site were the newest on the team, could an intelligence layer carry them?</p>
         </div>
 
         <p>
-          The question is not specific to data centers. The same shift is running through tax
-          preparation, investing, software, and medicine: expertise is scarce, software is cheap, and
-          capability keeps moving toward people with less training. Physical AI is doing the same thing
-          to machines. It is worth asking directly whether critical facilities are part of that trend or
-          an exception to it.
-        </p>
-
-        <p>
-          My reading is that the question is badly posed, and that fixing the framing produces a more
-          useful answer than arguing about the original.
-        </p>
-
-        <h3 class="sub">The question is really four questions</h3>
-
-        <p>
-          Any operational act contains four capabilities. Expertise is not spread evenly across them, and
-          software does not move them equally. Treating them as one thing is what makes the debate
-          circular.
+          Tax preparation, investing, software, and medicine all moved capability toward people with less
+          training. I think the question is badly posed, because any operational act is four capabilities, and
+          software moves them unequally.
         </p>
 
         <dl class="inventory">
-          <div class="inv-row">
-            <dt>Detection</dt>
-            <dd>
-              <span class="verdict verdict-yes">Transfers</span>
-              Noticing that something is wrong. A newcomer with instrumentation detects better than an
-              expert without it. Neuron already does this, and it is the least interesting part of the
-              question.
-            </dd>
-          </div>
-          <div class="inv-row">
-            <dt>Diagnosis</dt>
-            <dd>
-              <span class="verdict verdict-yes">Transfers</span>
-              Knowing what is wrong and why. This holds for failures the system has a model of. It breaks
-              on compound and novel failures, which are the ones that take buildings down.
-            </dd>
-          </div>
-          <div class="inv-row">
-            <dt>Decision</dt>
-            <dd>
-              <span class="verdict verdict-part">Partly</span>
-              Choosing what to do. The deciding input is often something the system cannot see. A
-              technician is already inside the cabinet. A customer migration runs tonight. The same move
-              tripped something two rooms away last year.
-            </dd>
-          </div>
-          <div class="inv-row">
-            <dt>Execution</dt>
-            <dd>
-              <span class="verdict verdict-no">Does not</span>
-              Performing the act. This is not a software limit and no interface will move it. Arc flash
-              injures and kills. Qualified-person rules, lockout-tagout, and protective equipment exist
-              because people died establishing that they were necessary.
-            </dd>
-          </div>
+          <div class="inv-row"><dt>Detection</dt><dd><span class="verdict verdict-yes">Transfers</span>A newcomer with instruments notices more than an expert without them.</dd></div>
+          <div class="inv-row"><dt>Diagnosis</dt><dd><span class="verdict verdict-yes">Transfers</span>For failures the system has a model of. Not for the novel, compound ones that take buildings down.</dd></div>
+          <div class="inv-row"><dt>Decision</dt><dd><span class="verdict verdict-part">Partly</span>The deciding input is often invisible to the system: a technician already in the cabinet, a migration tonight.</dd></div>
+          <div class="inv-row"><dt>Execution</dt><dd><span class="verdict verdict-no">Does not</span>Arc flash injures and kills. Qualified-person rules exist because people died establishing them.</dd></div>
         </dl>
 
         <p>
-          So the honest answer is split. Detection and diagnosis transfer now. Decision transfers under
-          conditions. Execution does not transfer at all, and should not. Any pitch that skips this
-          distinction will not survive a conversation with someone who has stood in front of an energized
-          switchboard.
-        </p>
-
-        <h3 class="sub">What other fields already learned</h3>
-
-        <p>Four software cases, ordered by how completely the transfer worked.</p>
-
-        <ul class="clean">
-          <li><strong>Tax preparation.</strong> The rules are finite and already written down. An error is amendable and the consequence arrives months later. The transfer was close to total.</li>
-          <li><strong>Automated investing.</strong> Allocation rules encode well. Consequences are delayed and spread across a portfolio. The transfer worked inside guardrails that regulators set.</li>
-          <li><strong>Code assistants.</strong> Version control makes almost every mistake reversible in seconds. That property, not model quality, is why this field moved fastest.</li>
-          <li><strong>Clinical decision support.</strong> Where the pattern breaks. Alerts fire constantly, staff learn to dismiss them, and the signal is lost inside the noise. Being correct is not sufficient. The system has to be correct at a rate that sustains attention.</li>
-        </ul>
-
-        <p>Physical AI has run the same experiment on machines, and the results are sharper.</p>
-
-        <ul class="clean">
-          <li><strong>Consumer drones.</strong> The strongest case. Stabilization, geofencing, and return-to-home removed the failure modes instead of training the pilot. A beginner flies competently on day one because the dangerous states are unreachable, not because they learned to avoid them.</li>
-          <li><strong>Driver assistance.</strong> The instructive failure. Conditional automation, where the vehicle drives and hands control back on request, concentrates the danger in the handback. The human is least practiced at the moment the situation is hardest. Several manufacturers skipped that level rather than solve it.</li>
-          <li><strong>Surgical robotics.</strong> A counter-example worth holding onto. It amplifies a trained surgeon and lowers no training requirement at all. Some physical AI raises the ceiling instead of the floor.</li>
-          <li><strong>Collaborative robots.</strong> Safety comes from physics rather than procedure. Force and speed limits make the machine safe next to an untrained person without that person knowing anything about it.</li>
-        </ul>
-
-        <p>
-          The driver assistance case is the one that should worry anyone building this, because
-          <em>Neuron's approval gate is a handback.</em> The system carries the situation, then stops and
-          asks a human to take control at the least convenient moment. That is the exact shape that has
-          proven hardest to make safe in vehicles.
-        </p>
-
-        <h3 class="sub">The variable that predicts whether it works</h3>
-
-        <p>
-          Across every case above, one pair of properties predicts the outcome: how reversible the mistake
-          is, and how quickly the consequence arrives. Tax errors are reversible and slow, so the transfer
-          was total. Defibrillation is irreversible and immediate, so the scope was cut to almost nothing
-          and the remaining act was made impossible to get wrong.
+          Across fields, one pair of properties predicts whether the transfer works: how reversible the mistake
+          is, and how fast the consequence arrives. Code assistants moved fastest because version control
+          makes mistakes reversible. Driver assistance struggled at the handback, where the human is least
+          practiced at the hardest moment. Neuron's approval gate is a handback too.
         </p>
 
         <div class="thesis">
-          <p style="margin-bottom:0">
-            Hand capability downward in proportion to reversibility.
-          </p>
+          <p>Hand capability downward in proportion to reversibility.</p>
         </div>
 
         <p>
-          This prototype already applies that rule to actions: raising an alert threshold is one click,
-          transferring critical load requires every pre-flight step acknowledged and the asset name typed
-          back. Extending it to people is the same rule with a second input. The gate becomes a function
-          of the action and of who is holding it.
+          The counter-effect is Bainbridge's <em>Ironies of Automation</em>: the more a system absorbs the
+          routine, the less practice people get for the exceptions. <strong>A tool aimed at the expertise
+          shortage can deepen it.</strong>
         </p>
-
-        <h3 class="sub">The counter-effect that rarely gets priced in</h3>
-
         <p>
-          Lisanne Bainbridge described this in 1983, in a paper called <em>Ironies of Automation</em>. The
-          more a system automates, the more the remaining human role shrinks to exactly the situations the
-          automation could not handle. Those are the hardest situations. And the human now has far less
-          practice, because the routine work that built their intuition has been absorbed.
+          So the realistic goal is not the novice as hero. It is the novice as competent first responder: do
+          not make it worse, buy time, and get the right expert there faster with context. The decision record
+          already does that pointed forward in time. Pointed sideways, it becomes an escalation packet.
         </p>
-
-        <p>
-          Air France 447 is the reference case. The autopilot disengaged after the airspeed sensors iced,
-          and the crew's manual handling had degraded. Three Mile Island is the older one: the information
-          was present and presented so poorly that trained operators reached the wrong conclusion.
-        </p>
-
-        <p>
-          Applied here, the risk is direct. If Neuron absorbs everything routine, it may produce operators
-          who never build the pattern library that made the retiring generation valuable.
-          <strong>A tool aimed at the expertise shortage can deepen it.</strong> That is a real tension in
-          this product, not a rhetorical one.
-        </p>
-
-        <h3 class="sub">Where I think this lands</h3>
-
-        <p>
-          In an actual emergency, the newest person's realistic contribution is almost never executing the
-          fix. It is three things: do not make it worse, buy time, and get the right human there faster
-          with better context.
-        </p>
-
-        <p>
-          The third one is where software changes the outcome, and this prototype already contains the
-          artifact for it. The decision record is a handoff pointed forward in time. Pointed sideways it
-          becomes an escalation packet: what changed, what I saw, what I already tried, what I did not
-          touch and why. The expert arrives with seconds of ramp-up instead of twenty minutes.
-        </p>
-
-        <p>
-          That reframes the goal from novice as hero, which is not credible, to novice as competent first
-          responder, which is. It is the defibrillator pattern. Narrow the scope until the remaining
-          decision is one an untrained person can make correctly, make the harmful path unavailable rather
-          than discouraged, and keep the human for the part the machine cannot do.
-        </p>
-
-        <div class="limits">
-          <h3 class="sub" style="margin-top:0">What I would want to test</h3>
-          <p>
-            Each of these is falsifiable, which is the point of writing them down rather than asserting a
-            conclusion.
-          </p>
-          <ul class="clean">
-            <li>Whether a junior operator handed a bounded set of pre-authorized reversible actions performs better than one handed the full interface, or freezes because the boundary itself reads as a warning.</li>
-            <li>Whether an escalation packet measurably shortens an expert's ramp-up time, and whether experts trust a packet assembled by someone they consider unqualified.</li>
-            <li>Whether authority that widens during an emergency, the way it does during a hospital code, is acceptable to the people who carry the liability.</li>
-            <li>Whether operators who work alongside a system like this retain diagnostic skill over a year, or lose it. This is the one that needs longitudinal data and the one nobody funds.</li>
-          </ul>
-          <p style="margin-bottom:0">
-            The deeper question sits underneath all four. Does an intelligence layer raise the floor, or
-            lower the ceiling? Raising the floor is the pitch. Lowering the ceiling is the risk: experts
-            atrophy, and the system's model quietly becomes the limit of what anyone thinks to consider.
-            Designing for the floor without capping the ceiling means the expert must always be able to
-            see past the recommendation, into the raw signals, the rejected hypotheses, and the
-            assumptions. Which turns the challenge surface from a refinement into a requirement.
-          </p>
-        </div>
       </section>
 
       <section id="process">
@@ -1222,24 +697,16 @@
         </div>
 
         <p>
-          I built this with an AI pair. I wrote the plans and the acceptance criteria, gated each phase
-          before the next one started, inspected every result in a real browser, and made every product and
-          design call. The AI wrote most of the code under those criteria.
+          I built it with an AI pair. I wrote the plans and acceptance criteria, gated each phase, checked every
+          result in a real browser, and made every product and design call. The AI wrote most of the code. The
+          interesting artifact is the sequence of decisions, including which of my own ideas to throw away.
         </p>
-
         <p>
-          I mention it because it is how the work actually happened, and because the interesting artifact is
-          not the code. It is the sequence of decisions: what to build, in what order, what to refuse, and
-          which of my own earlier choices to throw away. The quiz attached to every asset and the free
-          floating learning panel were both mine, and both were wrong, and cutting them made the product
-          better.
-        </p>
-
-        <p>
-          Verification was browser first throughout. A passing type check and a green build tell you the code
-          compiles. They do not tell you a node can be dragged, that a gate actually blocks, or that the
-          deployed site renders. Each of those was checked by driving the real interface and measuring the
-          result.
+          A second pass redesigned it for my portfolio. The audience changed from an interviewer with me in the
+          room to a visitor on their own. That one change drove the rest: an identity of my own, a graph that
+          reads at a glance, motion that marks state, the guided tour, and a phone page. The principles and
+          visual system are in the repository as <span class="mono">PRODUCT.md</span> and
+          <span class="mono">DESIGN.md</span>.
         </p>
 
         <div class="stack-grid">
@@ -1247,15 +714,15 @@
           <span class="tag">TypeScript</span>
           <span class="tag">Vite</span>
           <span class="tag">React Flow</span>
+          <span class="tag">Motion</span>
+          <span class="tag">IBM Plex Sans and Mono</span>
           <span class="tag">Phosphor Icons</span>
-          <span class="tag">CSS design tokens</span>
+          <span class="tag">OKLCH design tokens</span>
           <span class="tag">Vercel</span>
         </div>
 
         <p>
-          The repository README carries a walkthrough written for a live demo, a code map, and the same
-          positions stated for a reader rather than a viewer. Source is at
-          <a class="inline" href="https://github.com/trulou1028/neuron-shift">github.com/trulou1028/neuron-shift</a>.
+          Source is at <a class="inline" href="https://github.com/trulou1028/neuron-shift">github.com/trulou1028/neuron-shift</a>.
         </p>
       </section>
 
@@ -1306,6 +773,10 @@
 
     window.addEventListener("scroll", update, { passive: true });
     window.addEventListener("resize", function () { measure(); update(); });
+    // Lazy images change section offsets as they load.
+    Array.prototype.forEach.call(document.images, function (img) {
+      img.addEventListener("load", function () { measure(); update(); });
+    });
     if (document.fonts && document.fonts.ready) { document.fonts.ready.then(function () { measure(); update(); }); }
 
     measure();
